@@ -2,23 +2,46 @@
 #include <thread>
 using namespace std;
 
-class Cell{
-    Cell(){}
-    ~Cell(){}
+enum cellState{ DEAD, ALIVE };
 
-    // int animate(){}
+class Resident{
+    private:
+        bool state;
 
-    // int kill(){}
+    public:
+        Resident(bool stated = DEAD){
+           state = stated;
+        }
+
+        void animate(){
+            state = ALIVE;
+        }
+
+        void kill(){
+            state = ALIVE;
+        }
+
+        void get_state(){
+            cout << state << endl;
+        }
 };
 
-class Grid{
-    Grid(){}
-    ~Grid(){}
+class Neighborhood{
+    private:
+        Resident *population = nullptr;
 
-    void copy(){}
+    public:
+        Neighborhood(int *grid){
+            
+        }
+        ~Neighborhood(){}
+
+        void copy(){}
 };
 
 int main(int argc, char **argv){
+    Resident r = Resident(ALIVE);
+    r.get_state();
     cout << "hello world" << endl;
     return 0;
 }
