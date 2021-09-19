@@ -81,6 +81,7 @@ class Neighborhood{
                     }
                     currRow ++;
                 }
+                cout << endl;
                 inputStream.close();
             }
         }
@@ -104,9 +105,8 @@ class Neighborhood{
             return residents[x][y].getState();
         }
 
-        void getResidentCoords(const int &index, int &xCoord, int &yCoord){
-            xCoord = (index % Dimensions.rows);
-            yCoord = (index / Dimensions.rows); 
+        int getCellCoords(const int &index){
+            return Dimensions.rows*x + y;
         }
 
         void copy(Neighborhood *original){
@@ -126,6 +126,7 @@ class Neighborhood{
                     cout << endl;
                 }
             }
+            cout << endl;
         }
     
         void printToFile(const string &outputFile){
@@ -172,14 +173,13 @@ class Simulation{
         }
 
         void evolveResident(const int &x, const int &y){
-            // int neighborCount = countNeighbors(x, y);
-            // if(neighborCount < 2 || neighborCount > 3){
-            //     workingNeighborhood->killResident(x, y);
-            // }else if(neighborCount == 3){
-            //     workingNeighborhood->animateResident(x, y);
-            // }
-            // workingNeighborhood->killResident(x, y);
-            workingNeighborhood->animateResident(x, y);
+            int neighborCount = countNeighbors(x, y);
+            if(neighborCount < 2 || neighborCount > 3){
+                workingNeighborhood->killResident(x, y);
+            }else if(neighborCount == 3){
+                workingNeighborhood->animateResident(x, y);
+            }
+            workingNeighborhood->killResident(x, y);
         }
 
     public:
@@ -202,18 +202,8 @@ class Simulation{
             }
         }
 
-        void evolveRange(int index_start, int index_end){
-            int xCoord, yCoord;
-            for(int r = index_start; r < index_end; ++r){
-                workingNeighborhood->getResidentCoords(r, xCoord, yCoord);
-                evolveResident(xCoord, yCoord);
-            }
-        }
-
         void print(){
-            int x = 0; int y = 0;
             workingNeighborhood->print();
-            cout << endl;
         }
 };
 
@@ -255,7 +245,8 @@ int main(int argc, char **argv){
     //read file into a neighborhood;
 
     Simulation *s = new Simulation(InitData.inputFile);
-    s->evolveRange(0, 10);
+    s->print();
+    s->evolve();
     s->print();
     delete s;
 
