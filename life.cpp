@@ -11,6 +11,15 @@ struct Dimensions {
     int cols = 0;
 } Dimensions;
 
+struct InitData {
+    string inputFile;
+    string outputFile;
+    int steps;
+    int threads;
+
+    int firstPrint = 0;
+} InitData;
+
 class Resident{
     private:
         int state;
@@ -45,7 +54,7 @@ class Resident{
 
 class Neighborhood{
     private:
-        Resident **residents { nullptr };
+        Resident **residents;
 
     public:
         Neighborhood(){
@@ -86,8 +95,12 @@ class Neighborhood{
             delete[] residents;
         }
 
-        void setResidentState(int x, int y){
-            residents[x][y].setState(1);
+        void killResident(int x, int y){
+            residents[x][y]->kill();
+        }
+
+        void animateResident(int x, int y){
+            residents[x][y]->animate();
         }
 
         int getResidentState(int x, int y){
@@ -102,20 +115,6 @@ class Neighborhood{
             }
         }
 
-        void evolve(Neighborhood *previous){
-            // for(int r = 0; r < Dimensions.rows; ++r){
-            //     for(int c = 0; c < Dimensions.cols; ++c){
-            //         if(
-            //         cout << residents[r][c]; 
-            //     }
-            //     cout << endl;
-            // }
-        }
-
-        void updateResident(){
-
-        }
-
         void print(){
             if(residents){
                 for(int r = 0; r < Dimensions.rows; ++r){
@@ -127,20 +126,76 @@ class Neighborhood{
             }
             cout << endl;
         }
+    
+        void printToFile(const string &outputFile){
+            ofstream outfile;
+            if(InitData.firstPrint = 0){
+                outfile.open (InitData.outputFile);
+            }else{
+                outfile.open (InitData.outputFile, fstream::app);
+            }
+            if(residents){
+                for(int r = 0; r < Dimensions.rows; ++r){
+                    for(int c = 0; c < Dimensions.cols; ++c){
+                        outfile << residents[r][c]; 
+                    }
+                    outfile << endl;
+                }
+            }
+            outfile << endl;
+            ++InitData.firstPrint;
+        }
+
 };
 
-class Validator{
+// class Validator{
+//     private:
+//         char *args;
+        
+//     public:
+//         Validator(char **argv){}
+        
+//         int checkInputFile(){
+            
+//         }
+// };
 
+class Simulation{
+    private:
+        Neighborhood *referenceNeighborhood;
+        Neighborhood *workingNeighborhood;
+
+        int countNeighbors(const int &x, const int &y){
+            //border conditions
+        }
+
+        int evolveResident(const int &x, const int &y){
+            int neighborCount = countNeighbors(x, y);
+            if(neighborCount < 2 || neighborCount > 3){
+                workingNeighborhood->killResident(x, y);
+            }else if(neighborCount == 3){
+                workingNeighborhood->animate(x, y);
+            }
+        }
+
+    public:
+        Simulation(){
+            referenceNeighborhood = new Neighborhood(InitData.inputFile);
+            workingNeighborhood = new Neighborhood();
+        }
+
+        void evolve(){
+            for(int r = 0; r < InitData.rows; ++r){
+                for(int c = 0; c < InitData.cols; ++c){
+                    evolveResident(r, c);
+                }
+            }
+        }
 };
 
 class Executor{
-    public:
-        Executor(){}
 
-        void execute();
-};
-
-void checkDimensions(const string inputFile){
+void checkDimensions(const string &inputFile){
     string currLine;
     ifstream inputStream (inputFile);
     if(inputStream.is_open()){
@@ -152,19 +207,12 @@ void checkDimensions(const string inputFile){
     Dimensions.cols = currLine.length();
 }
 
-struct InitData {
-    string inputFile;
-    string outputFile;
-    int steps;
-    int threads;
-} InitData;
-
 int main(int argc, char **argv){
     //read and validate input-------------------
     //validate();
     //init();
     //execute();
-
+    // Validator *val = new Validator(argv);
     if(argc != 5){
         cout << "program requires four separate args: \n" << "(1) inpute file name, (2) output filename, (3) number of steps, (4) number of threads" << "\n";
         return 0;
@@ -175,21 +223,18 @@ int main(int argc, char **argv){
     InitData.steps = atoi(argv[3]);
     InitData.threads = atoi(argv[4]);
     checkDimensions(InitData.inputFile);
-    cout << Dimensions.rows << Dimensions.cols << endl;
     //------------------------------------------
 
     //create reference board from initial input
     //iterate based on a previous board
     //copy iteration to reference and repeat OR end
+    cout << InitData.firstPrint << endl;
     Neighborhood *referenceNeighborhood = new Neighborhood(InitData.inputFile);
-    referenceNeighborhood->print();
-    
-    cout << endl;
+    referenceNeighborhood->printToFile(InitData.outputFile);
     
     Neighborhood *workingNeighborhood = new Neighborhood();
-    workingNeighborhood->print();
-    workingNeighborhood->copy(referenceNeighborhood);
-    workingNeighborhood->print();
+    workingNeighborhood->printToFile(InitData.outputFile);
+    cout << InitData.firstPrint << endl;
     //read file into a neighborhood;
     delete referenceNeighborhood;
     delete workingNeighborhood;
