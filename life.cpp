@@ -64,7 +64,7 @@ class Neighborhood{
             }
         }
 
-        void fileToNeighborhood(string inputFile){
+        void fileToNeighborhood(const string &inputFile){
             string currLine;
             int currRow = 0;
             int currState = 0;
@@ -226,7 +226,6 @@ class Simulation{
         }
 
         void print(){
-            int x = 0; int y = 0;
             workingNeighborhood.print();
             cout << endl;
         }
@@ -236,8 +235,6 @@ class Executor{
     private:
         vector<thread*> threads;
         vector<size_t>threadEvolutionChecker;
-        bool evolutionComplete; 
-        int notifier = 0;
 
         // int sumChecker(int &checker){
         //     for(auto i : threadEvolutionChecker){
@@ -278,7 +275,8 @@ class Executor{
         }
 
         void execute(Simulation &s){
-            evolutionComplete = false;
+            cout << "init grid: \n\n";
+            s.print();
             for(size_t i = 0; i < InitData.threads; ++i){
                 threads.push_back(new thread([&,i](){
                     evolveTask(i, s, Dimensions.rows, Dimensions.cols,
@@ -286,7 +284,7 @@ class Executor{
                     }));
             }
 
-            for(size_t j = 0; j < InitData.steps - 1; ++j){
+            for(size_t j = 0; j < InitData.steps; ++j){
                 size_t checker = 0;
                 while(checker != InitData.threads){
                     for(auto i : threadEvolutionChecker){
@@ -352,7 +350,6 @@ int main(int argc, char **argv){
     Simulation s = Simulation(InitData.inputFile);
     Executor e = Executor();
     e.execute(s);
-    s.print();
     cout << "c++ version: " << __cplusplus << "\n" << endl;
 
     return 0;
