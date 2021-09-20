@@ -20,59 +20,59 @@ struct InitData {
     int threads;
 } InitData;
 
-class Resident{
+class Resident {
     private:
         int state;
 
     public:
-        Resident(int stated = DEAD){
+        Resident(int stated = DEAD) {
            state = stated;
         }
 
-        void animate(){
+        void animate() {
             state = ALIVE;
         }
 
-        void kill(){
+        void kill() {
             state = DEAD;
         }
 
-        void setState(int state){
+        void setState(int state) {
             this->state = state;
         }
 
-        int getState(){
+        int getState() {
             return state;
         }
 
-        friend ostream& operator<< (ostream& os, const Resident& resident){
+        friend ostream& operator<< (ostream& os, const Resident& resident) {
             os << resident.state;
             return os;
         }
 
 };
 
-class Neighborhood{
+class Neighborhood {
     private:
         Resident **residents;
 
     public:
-        Neighborhood(){
+        Neighborhood() {
             residents = new Resident *[Dimensions.rows];
-            for(int i = 0; i < Dimensions.rows; ++i){
+            for(int i = 0; i < Dimensions.rows; ++i) {
                 residents[i] = new Resident[Dimensions.cols];
             }
         }
 
-        void fileToNeighborhood(const string &inputFile){
+        void fileToNeighborhood(const string &inputFile) {
             string currLine;
             int currRow = 0;
             int currState = 0;
 
             ifstream inputStream (inputFile);
-            if(inputStream.is_open()){
-                while(getline (inputStream, currLine)){
-                    for(int i = 0; i < Dimensions.cols; ++i){
+            if(inputStream.is_open()) {
+                while(getline (inputStream, currLine)) {
+                    for(int i = 0; i < Dimensions.cols; ++i) {
                         currState = (int) currLine.at(i) - 48;
                         residents[currRow][i].setState(currState);
                     }
@@ -82,43 +82,35 @@ class Neighborhood{
             }
         }
 
-        ~Neighborhood(){
-            for(int i = 0; i < Dimensions.rows; ++i){
+        ~Neighborhood() {
+            for(int i = 0; i < Dimensions.rows; ++i) {
                 delete[] residents[i];
             }
             delete[] residents;
             cout << "Neighborhood: destroyed" << endl;
         }
 
-        void killResident(const int &x, const int &y){
+        void killResident(const int &x, const int &y) {
             residents[x][y].kill();
         }
 
-        void animateResident(const int &x, const int &y){
+        void animateResident(const int &x, const int &y) {
             residents[x][y].animate();
         }
 
-        int getResidentState(const int &x, const int &y){
+        int getResidentState(const int &x, const int &y) {
             return residents[x][y].getState();
         }
 
-        void getResidentCoords(const int &index, int &xCoord, int &yCoord){
+        void getResidentCoords(const int &index, int &xCoord, int &yCoord) {
             xCoord = (index % Dimensions.rows);
             yCoord = (index / Dimensions.rows); 
         }
 
-        void copy(Neighborhood *original){
-            for(int r = 0; r < Dimensions.rows; ++r){
-                for(int c = 0; c < Dimensions.cols; ++c){
-                    residents[r][c].setState(original->getResidentState(r,c)); 
-                }
-            }
-        }
-
-        void print(){
-            if(residents){
-                for(int r = 0; r < Dimensions.rows; ++r){
-                    for(int c = 0; c < Dimensions.cols; ++c){
+        void print() {
+            if(residents) {
+                for(int r = 0; r < Dimensions.rows; ++r) {
+                    for(int c = 0; c < Dimensions.cols; ++c) {
                         cout << residents[r][c]; 
                     }
                     cout << endl;
@@ -126,12 +118,12 @@ class Neighborhood{
             }
         }
     
-        void printToFile(const string &outputFile){
+        void printToFile() {
             ofstream outfile;
             outfile.open (InitData.outputFile, fstream::app);
             if(residents){
-                for(int r = 0; r < Dimensions.rows; ++r){
-                    for(int c = 0; c < Dimensions.cols; ++c){
+                for(int r = 0; r < Dimensions.rows; ++r) {
+                    for(int c = 0; c < Dimensions.cols; ++c) {
                         outfile << residents[r][c]; 
                     }
                     outfile << endl;
@@ -155,68 +147,88 @@ class Neighborhood{
 // };
 
 //an object built for performing simulations using neighborhoods
-class Simulation{
+class Simulation {
     private:
         Neighborhood referenceNeighborhood;
         Neighborhood workingNeighborhood;
 
-        int countNeighbors(const int &x, const int &y){
-            // bool rightBorder = (y == rows - 1);
-            // bool leftBorder = (y == 0);
-            // bool topBorder = (x == 0);
-            // bool botBorder = (x == cols - 1);
-            // for(int i = 0; i < x-1; ++
-            return 0;
-        }
+        int countNeighbors(const int &x, const int &y) {
 
-        void evolveResident(const int &x, const int &y){
-            // int neighborCount = countNeighbors(x, y);
-            // if(neighborCount < 2 || neighborCount > 3){
-            //     workingNeighborhood->killResident(x, y);
-            // }else if(neighborCount == 3){
-            //     workingNeighborhood->animateResident(x, y);
-            // }
-            // workingNeighborhood->killResident(x, y);
-            if(referenceNeighborhood.getResidentState(x,y) == DEAD){
-                workingNeighborhood.animateResident(x, y);
-            }else{
-                workingNeighborhood.killResident(x, y);
+            int count = 0;
+            int index = x + Dimensions.rows*y;
+
+            vector<int>neighbors {
+                index - 1,
+                index + 1,  
+                index - Dimensions.rows,
+                index + Dimensions.rows,
+                index + Dimensions.rows - 1,
+                index + Dimensions.rows + 1, 
+                index - Dimensions.rows - 1, 
+                index - Dimensions.rows + 1 
+            };
+
+            int xCoord, yCoord;
+            for(auto n : neighbors) {
+                if(n >= 0) {
+                    referenceNeighborhood.getResidentCoords(n, xCoord, yCoord);
+                    if(referenceNeighborhood.getResidentState(xCoord,yCoord) == 1) {
+                        count ++;
+                    }
+                }
             }
+
+                return count;
+       }
+
+        void evolveResident(const int &x, const int &y) {
+            int neighborCount = countNeighbors(x, y);
+            if(neighborCount < 2 || neighborCount > 3){
+                workingNeighborhood.killResident(x, y);
+            }else if(neighborCount == 3){
+                workingNeighborhood.animateResident(x, y);
+            }
+            // if(referenceNeighborhood.getResidentState(x,y) == DEAD) {
+            //     workingNeighborhood.animateResident(x, y);
+            // }else{
+            //     workingNeighborhood.killResident(x, y);
+            // }
         }
 
     public:
-        Simulation(const string &inputFile){
+        Simulation(const string &inputFile) {
+
             referenceNeighborhood.fileToNeighborhood(InitData.inputFile);
             workingNeighborhood.fileToNeighborhood(InitData.inputFile);
         }
 
-        ~Simulation(){
+        ~Simulation() {
             cout << "Simulation: destroyed" << endl;
         }
 
         //evolve a neighborhood by the rules of the game of life
-        void evolve(){
-            for(int r = 0; r < Dimensions.rows; ++r){
-                for(int c = 0; c < Dimensions.cols; ++c){
+        void evolve() {
+            for(int r = 0; r < Dimensions.rows; ++r) {
+                for(int c = 0; c < Dimensions.cols; ++c) {
                     evolveResident(r, c);
                 }
             }
-        }
+        }            
 
-        void evolveRange(int index_start, int index_end){
+        void evolveRange(int index_start, int index_end) {
             int xCoord, yCoord;
-            for(int r = index_start; r < index_end; ++r){
+            for(int r = index_start; r < index_end; ++r) {
                 workingNeighborhood.getResidentCoords(r, xCoord, yCoord);
                 evolveResident(xCoord, yCoord);
             }
         }
 
-        void storeCurrentState(){
+        void storeCurrentState() {
             int currentResidentState;
-            for(int r = 0; r < Dimensions.rows; ++r){
-                for(int c = 0; c < Dimensions.cols; ++c){
+            for(int r = 0; r < Dimensions.rows; ++r) {
+                for(int c = 0; c < Dimensions.cols; ++c) {
                     currentResidentState = workingNeighborhood.getResidentState(r,c);
-                    if(currentResidentState == DEAD){
+                    if(currentResidentState == DEAD) {
                         referenceNeighborhood.killResident(r,c);
                     }else{
                         referenceNeighborhood.animateResident(r,c);
@@ -225,13 +237,17 @@ class Simulation{
             }
         }
 
-        void print(){
+        void print() {
             workingNeighborhood.print();
             cout << endl;
         }
+
+        void printToFile() {
+            workingNeighborhood.printToFile();
+        }
 };
 
-class Executor{
+class Executor {
     private:
         vector<thread*> threads;
         vector<size_t>threadEvolutionChecker;
@@ -243,7 +259,7 @@ class Executor{
         // }
 
         void evolveTask(size_t rank, Simulation &s, size_t rows, 
-                        size_t cols, size_t threads, size_t steps){
+                        size_t cols, size_t threads, size_t steps) {
             // cout << "Rank " << rank << ": armed and ready" << endl;
             size_t gridSize = rows * cols;
             size_t taskSize = (gridSize/threads) + 
@@ -253,10 +269,10 @@ class Executor{
             size_t indexEnd = indexStart + taskSize;
             // cout << indexStart << ", " << indexEnd << endl;
             int checker = 0;
-            for(size_t i = 0; i < steps; ++i){
+            for(size_t i = 0; i < steps; ++i) {
                 //if this evolution has been completed
                 //and stage has not been reset, block
-                while(threadEvolutionChecker[rank] == 1){}
+                while(threadEvolutionChecker[rank] == 1) {}
                 //other wise, evolve the range
                 s.evolveRange(indexStart, indexEnd);
                 //then, say that this evolution has been completed
@@ -266,41 +282,42 @@ class Executor{
 
     public:
 
-        Executor(){
+        Executor() {
             threadEvolutionChecker = vector<size_t>(InitData.threads, 0);
         }
             
-        ~Executor(){
+        ~Executor() {
             cout << "Executor: destroyed" << endl;
         }
 
-        void execute(Simulation &s){
-            cout << "init grid: \n\n";
-            s.print();
-            for(size_t i = 0; i < InitData.threads; ++i){
-                threads.push_back(new thread([&,i](){
+        void execute(Simulation &s) {
+            // s.print();
+            s.printToFile();
+            for(size_t i = 0; i < InitData.threads; ++i) {
+                threads.push_back(new thread([&,i]() {
                     evolveTask(i, s, Dimensions.rows, Dimensions.cols,
                                InitData.threads, InitData.steps);
                     }));
             }
 
-            for(size_t j = 0; j < InitData.steps; ++j){
+            for(size_t j = 0; j < InitData.steps; ++j) {
                 size_t checker = 0;
-                while(checker != InitData.threads){
-                    for(auto i : threadEvolutionChecker){
+                while(checker != InitData.threads) {
+                    for(auto i : threadEvolutionChecker) {
                         checker = checker + i;
                     }
-                    if(checker != InitData.threads){
+                    if(checker != InitData.threads) {
                         checker = 0;
                     }
                 }
-                s.print();
+                // s.print();
+                s.printToFile();
                 s.storeCurrentState();
                 fill(threadEvolutionChecker.begin(), 
                     threadEvolutionChecker.end(), 0);
             }
 
-            for(size_t k = 0; k < InitData.threads; ++k){
+            for(size_t k = 0; k < InitData.threads; ++k) {
                 thread& t = *threads[k];
                 t.join();
                 delete threads[k]; 
@@ -311,11 +328,11 @@ class Executor{
 
 };
 
-void checkDimensions(const string &inputFile){
+void checkDimensions(const string &inputFile) {
     string currLine;
     ifstream inputStream (inputFile);
-    if(inputStream.is_open()){
-        while(getline (inputStream, currLine)){
+    if(inputStream.is_open()) {
+        while(getline (inputStream, currLine)) {
             Dimensions.rows++;
         }
         inputStream.close();
@@ -323,13 +340,13 @@ void checkDimensions(const string &inputFile){
     Dimensions.cols = currLine.length();
 }
 
-int main(int argc, char **argv){
+int main(int argc, char **argv) {
     //read and validate input-------------------
     //validate();
     //init();
     //execute();
     // Validator *val = new Validator(argv);
-    if(argc != 5){
+    if(argc != 5) {
         cout << "program requires four separate args: \n" << "(1) inpute file name, (2) output filename, (3) number of steps, (4) number of threads" << "\n";
         return 0;
     }
@@ -345,7 +362,8 @@ int main(int argc, char **argv){
     //iterate based on a previous board
     //copy iteration to reference and repeat OR end
     //read file into a neighborhood;
-    cout << "threads: " << InitData.threads << endl << endl;
+    cout << "threads: " << InitData.threads << endl;
+    cout << "steps: " << InitData.steps << endl;
 
     Simulation s = Simulation(InitData.inputFile);
     Executor e = Executor();

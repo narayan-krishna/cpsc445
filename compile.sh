@@ -1,2 +1,9 @@
-g++ life.cpp -lpthread
-time ./a.out init_grid.txt output.txt 0 6
+g++ life.cpp -lpthread -o life.exe
+cat > input.txt <<EOF
+0000000001
+0000010001
+0000101001
+0000000000
+0000000000
+EOF
+./life.exe input2.txt output.txt 3 5
