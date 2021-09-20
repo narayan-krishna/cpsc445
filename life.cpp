@@ -211,6 +211,20 @@ class Simulation{
             }
         }
 
+        void storeCurrentState(){
+            int currentResidentState;
+            for(int r = 0; r < Dimensions.rows; ++r){
+                for(int c = 0; c < Dimensions.cols; ++c){
+                    currentResidentState = workingNeighborhood.getResidentState(r,c);
+                    if(currentResidentState == DEAD){
+                        referenceNeighborhood.killResident(r,c);
+                    }else{
+                        referenceNeighborhood.animateResident(r,c);
+                    }
+                }
+            }
+        }
+
         void print(){
             int x = 0; int y = 0;
             workingNeighborhood.print();
@@ -223,25 +237,40 @@ class Executor{
         vector<thread*> threads;
         vector<size_t>threadEvolutionChecker;
         bool evolutionComplete; 
+        int notifier = 0;
+
+        // int sumChecker(int &checker){
+        //     for(auto i : threadEvolutionChecker){
+        //         checker++;
+        //     }
+        // }
 
         void evolveTask(size_t rank, Simulation &s, size_t rows, 
                         size_t cols, size_t threads, size_t steps){
-            cout << "Rank " << rank << ": armed and ready" << endl;
+            // cout << "Rank " << rank << ": armed and ready" << endl;
             size_t gridSize = rows * cols;
             size_t taskSize = (gridSize/threads) + 
                               ((rank < gridSize%threads)?1:0);
             size_t indexStart = rank*(gridSize/threads) + 
                                 min(rank, gridSize%threads);
             size_t indexEnd = indexStart + taskSize;
+            // cout << indexStart << ", " << indexEnd << endl;
+            int checker = 0;
             for(size_t i = 0; i < steps; ++i){
+                //if this evolution has been completed
+                //and stage has not been reset, block
+                while(threadEvolutionChecker[rank] == 1){}
+                //other wise, evolve the range
                 s.evolveRange(indexStart, indexEnd);
+                //then, say that this evolution has been completed
+                threadEvolutionChecker[rank] = 1;
             }
         }
 
     public:
 
         Executor(){
-
+            threadEvolutionChecker = vector<size_t>(InitData.threads, 0);
         }
             
         ~Executor(){
@@ -257,10 +286,26 @@ class Executor{
                     }));
             }
 
-            for(size_t j = 0; j < InitData.threads; ++j){
-                thread& t = *threads[j];
+            for(size_t j = 0; j < InitData.steps - 1; ++j){
+                size_t checker = 0;
+                while(checker != InitData.threads){
+                    for(auto i : threadEvolutionChecker){
+                        checker = checker + i;
+                    }
+                    if(checker != InitData.threads){
+                        checker = 0;
+                    }
+                }
+                s.print();
+                s.storeCurrentState();
+                fill(threadEvolutionChecker.begin(), 
+                    threadEvolutionChecker.end(), 0);
+            }
+
+            for(size_t k = 0; k < InitData.threads; ++k){
+                thread& t = *threads[k];
                 t.join();
-                delete threads[j]; 
+                delete threads[k]; 
             }
 
             threads.resize(0);
@@ -307,9 +352,7 @@ int main(int argc, char **argv){
     Simulation s = Simulation(InitData.inputFile);
     Executor e = Executor();
     e.execute(s);
-    cout << endl;
     s.print();
-
     cout << "c++ version: " << __cplusplus << "\n" << endl;
 
     return 0;
