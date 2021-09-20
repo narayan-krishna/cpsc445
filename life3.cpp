@@ -2,8 +2,6 @@
 #include <fstream>
 #include <string>
 #include <thread>
-#include <unistd.h>
-#include <vector>
 using namespace std;
 
 enum cellState{ DEAD, ALIVE };
@@ -64,7 +62,11 @@ class Neighborhood{
             }
         }
 
-        void fileToNeighborhood(string inputFile){
+        Neighborhood(string inputFile){
+            residents = new Resident *[Dimensions.rows];
+            for(int i = 0; i < Dimensions.rows; ++i){
+                residents[i] = new Resident[Dimensions.cols];
+            }
             string currLine;
             int currRow = 0;
             int currState = 0;
@@ -157,8 +159,8 @@ class Neighborhood{
 //an object built for performing simulations using neighborhoods
 class Simulation{
     private:
-        Neighborhood referenceNeighborhood;
-        Neighborhood workingNeighborhood;
+        Neighborhood *referenceNeighborhood;
+        Neighborhood *workingNeighborhood;
 
         int countNeighbors(const int &x, const int &y){
             // bool rightBorder = (y == rows - 1);
@@ -177,20 +179,18 @@ class Simulation{
             //     workingNeighborhood->animateResident(x, y);
             // }
             // workingNeighborhood->killResident(x, y);
-            if(referenceNeighborhood.getResidentState(x,y) == DEAD){
-                workingNeighborhood.animateResident(x, y);
-            }else{
-                workingNeighborhood.killResident(x, y);
-            }
+            workingNeighborhood->animateResident(x, y);
         }
 
     public:
-        Simulation(const string &inputFile){
-            referenceNeighborhood.fileToNeighborhood(InitData.inputFile);
-            workingNeighborhood.fileToNeighborhood(InitData.inputFile);
+        Simulation(string inputFile){
+            referenceNeighborhood = new Neighborhood(InitData.inputFile);
+            workingNeighborhood = new Neighborhood(InitData.inputFile);
         }
 
         ~Simulation(){
+            delete referenceNeighborhood;
+            delete workingNeighborhood;
             cout << "Simulation: destroyed" << endl;
         }
 
@@ -206,65 +206,21 @@ class Simulation{
         void evolveRange(int index_start, int index_end){
             int xCoord, yCoord;
             for(int r = index_start; r < index_end; ++r){
-                workingNeighborhood.getResidentCoords(r, xCoord, yCoord);
+                workingNeighborhood->getResidentCoords(r, xCoord, yCoord);
                 evolveResident(xCoord, yCoord);
             }
         }
 
         void print(){
             int x = 0; int y = 0;
-            workingNeighborhood.print();
+            workingNeighborhood->print();
             cout << endl;
         }
 };
 
 class Executor{
-    private:
-        vector<thread*> threads;
-        vector<size_t>threadEvolutionChecker;
-        bool evolutionComplete; 
-
-        void evolveTask(size_t rank, Simulation &s, size_t rows, 
-                        size_t cols, size_t threads, size_t steps){
-            cout << "Rank " << rank << ": armed and ready" << endl;
-            size_t gridSize = rows * cols;
-            size_t taskSize = (gridSize/threads) + 
-                              ((rank < gridSize%threads)?1:0);
-            size_t indexStart = rank*(gridSize/threads) + 
-                                min(rank, gridSize%threads);
-            size_t indexEnd = indexStart + taskSize;
-            for(size_t i = 0; i < steps; ++i){
-                s.evolveRange(indexStart, indexEnd);
-            }
-        }
-
     public:
-
-        Executor(){
-
-        }
-            
-        ~Executor(){
-            cout << "Executor: destroyed" << endl;
-        }
-
-        void execute(Simulation &s){
-            evolutionComplete = false;
-            for(size_t i = 0; i < InitData.threads; ++i){
-                threads.push_back(new thread([&,i](){
-                    evolveTask(i, s, Dimensions.rows, Dimensions.cols,
-                               InitData.threads, InitData.steps);
-                    }));
-            }
-
-            for(size_t j = 0; j < InitData.threads; ++j){
-                thread& t = *threads[j];
-                t.join();
-                delete threads[j]; 
-            }
-
-            threads.resize(0);
-        }
+        Simulation *s;
 
 };
 
@@ -302,15 +258,11 @@ int main(int argc, char **argv){
     //iterate based on a previous board
     //copy iteration to reference and repeat OR end
     //read file into a neighborhood;
-    cout << "threads: " << InitData.threads << endl << endl;
 
     Simulation s = Simulation(InitData.inputFile);
-    Executor e = Executor();
-    e.execute(s);
-    cout << endl;
+    s.evolveRange(0, 10);
     s.print();
 
-    cout << "c++ version: " << __cplusplus << "\n" << endl;
 
     return 0;
 }

@@ -1,2 +1,2 @@
-g++ life.cpp
-time ./a.out init_grid.txt output.txt 3 4
+g++ life.cpp -lpthread
+time ./a.out init_grid.txt output.txt 1 5
