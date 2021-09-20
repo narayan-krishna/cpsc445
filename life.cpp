@@ -74,7 +74,12 @@ class Neighborhood {
                 while(getline (inputStream, currLine)) {
                     for(int i = 0; i < Dimensions.cols; ++i) {
                         currState = (int) currLine.at(i) - 48;
-                        residents[currRow][i].setState(currState);
+                        if(currLine.at(i) != '0' && currLine.at(i) != '1'){
+                            cout << "X";
+                        }
+                        if(currState == 0 || currState == 1) {
+                            residents[currRow][i].setState(currState);
+                        }
                     }
                     currRow ++;
                 }
@@ -334,10 +339,12 @@ void checkDimensions(const string &inputFile) {
     if(inputStream.is_open()) {
         while(getline (inputStream, currLine)) {
             Dimensions.rows++;
+            if(Dimensions.cols == 0){
+                Dimensions.cols = currLine.length();
+            }
         }
         inputStream.close();
     }
-    Dimensions.cols = currLine.length();
 }
 
 int main(int argc, char **argv) {
@@ -364,11 +371,13 @@ int main(int argc, char **argv) {
     //read file into a neighborhood;
     cout << "threads: " << InitData.threads << endl;
     cout << "steps: " << InitData.steps << endl;
+    cout << "rows: " << Dimensions.rows << endl;
+    cout << "cols: " << Dimensions.cols << endl;
 
     Simulation s = Simulation(InitData.inputFile);
     Executor e = Executor();
     e.execute(s);
-    cout << "c++ version: " << __cplusplus << "\n" << endl;
+    cout << "\nc++ version: " << __cplusplus << "\n" << endl;
 
     return 0;
 }

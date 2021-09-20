@@ -6,4 +6,4 @@ cat > input.txt <<EOF
 0000000000
 0000000000
 EOF
-./life.exe input2.txt output.txt 3 5
+./life.exe input.txt output.txt 3 5
