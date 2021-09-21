@@ -68,6 +68,7 @@ class Neighborhood {
         Resident **residents;
         size_t deadrows = Dimensions.rows + 2;
         size_t deadcols = Dimensions.cols + 2;
+        const size_t buffer = 1;
 
     public:
         /*initialize grid*/
@@ -75,6 +76,32 @@ class Neighborhood {
             residents = new Resident *[deadrows];
             for(size_t i = 0; i < deadrows; ++i) {
                 residents[i] = new Resident[deadcols];
+            }
+        }
+
+        /*copy a file to grid. file is copied inside the dead cell border*/
+        Neighborhood(const string &inputFile) {
+            Neighborhood();
+            string currLine;
+            int currRow = 0;
+            int currState = 0;
+
+            /*open an input file stream from user file*/
+            ifstream inputStream (inputFile);
+            if(inputStream.is_open()) {
+                while(getline (inputStream, currLine)) {
+                    for(size_t i = 0; i < Dimensions.cols; ++i) {
+                        /*convert char to proper int*/
+                        currState = (int) currLine.at(i) - 48;
+
+                        /*place inside border by a +1 offset*/
+                        if(currState == 0 || currState == 1) {
+                            residents[currRow + buffer][i + buffer].setState(currState);
+                        }
+                    }
+                    currRow ++;
+                }
+                inputStream.close();
             }
         }
 
@@ -94,7 +121,7 @@ class Neighborhood {
 
                         /*place inside border by a +1 offset*/
                         if(currState == 0 || currState == 1) {
-                            residents[currRow + 1][i + 1].setState(currState);
+                            residents[currRow + buffer][i + buffer].setState(currState);
                         }
                     }
                     currRow ++;
@@ -114,17 +141,17 @@ class Neighborhood {
 
         /*manually kill resident in neighborhood*/
         void killResident(const int &x, const int &y) {
-            residents[x+1][y+1].kill();
+            residents[x+buffer][y+buffer].kill();
         }
 
         /*manually animate*/
         void animateResident(const int &x, const int &y) {
-            residents[x+1][y+1].animate();
+            residents[x+buffer][y+buffer].animate();
         }
 
         /*get whether resident is dead or alive*/
         int getResidentState(const int &x, const int &y) {
-            return residents[x+1][y+1].getState();
+            return residents[x+buffer][y+buffer].getState();
         }
 
         /*get a residents coordinates based of its index*/
@@ -206,7 +233,11 @@ class Simulation {
 
         /*initialize neighborhoods from file*/
         Simulation(const string &inputFile) {
+            referenceNeighborhood.fileToNeighborhood(InitData.inputFile);
+            workingNeighborhood.fileToNeighborhood(InitData.inputFile);
+        }
 
+        Simulation(Neighborhood &inputNeighborhood) {
             referenceNeighborhood.fileToNeighborhood(InitData.inputFile);
             workingNeighborhood.fileToNeighborhood(InitData.inputFile);
         }
@@ -288,10 +319,11 @@ class Executor {
             size_t indexStart = rank*(gridSize/threads) + 
                                 min(rank, gridSize%threads);
             size_t indexEnd = indexStart + taskSize;
+            // cout << indexStart << ", " << indexEnd << endl;
             
             /*operate evolution over the determined range for the input steps*/
             for(size_t i = 0; i < steps; ++i) {
-                /*block if range has already been evolved*/
+                // /*block if range has already been evolved*/
                 /*unlocks when all threads have evolved their ranges*/
                 while(threadEvolutionChecker[rank] == 1) {}
 
@@ -299,6 +331,7 @@ class Executor {
                 s.evolveRange(indexStart, indexEnd);
                 /*establish that this rank has finished evolution*/
                 threadEvolutionChecker[rank] = 1;
+            // }
             }
         }
 
@@ -318,7 +351,31 @@ class Executor {
             /*print the initial grid for reference*/
             s.printToFile();
 
-            /*create threads and push them to thread vector*/
+            /*allocating thread for each step -- much faster*/
+            // for(size_t st = 0; st < InitData.steps; ++st){
+
+            //     /*create threads and push them to thread vector*/
+            //     for(size_t i = 0; i < InitData.threads; ++i) {
+            //         threads.push_back(new thread([&,i]() {
+            //             evolveTask(i, s, Dimensions.rows, Dimensions.cols,
+            //                     InitData.threads, InitData.steps);
+            //             }));
+            //     }
+
+            //     s.printToFile();
+            //     s.storeCurrentState();
+
+            //     for(size_t k = 0; k < InitData.threads; ++k) {
+            //         thread& t = *threads[k];
+            //         t.join();
+            //         delete threads[k]; 
+            //         // cout << "Thread: destroyed" << endl;
+            //     }
+
+            //     threads.resize(0);
+            // }
+
+            /*or locking them using the main program*/
             for(size_t i = 0; i < InitData.threads; ++i) {
                 threads.push_back(new thread([&,i]() {
                     evolveTask(i, s, Dimensions.rows, Dimensions.cols,
@@ -326,9 +383,7 @@ class Executor {
                     }));
             }
 
-            /*concurrently, use main thread as a checker*/
             for(size_t j = 0; j < InitData.steps; ++j) {
-
                 /*the checker reaches the thread count when all threads finish*/
                 int checker = 0;
                 while(checker != InitData.threads) {
@@ -336,12 +391,10 @@ class Executor {
                     for(auto i : threadEvolutionChecker) {
                         checker = checker + i;
                     }
-
                     /*if they haven't, reset for another check*/
                     if(checker != InitData.threads) {
                         checker = 0;
                     }
-
                     /*if they have, while loop will be passed*/
                 }
 
@@ -352,6 +405,7 @@ class Executor {
                 /*reset checker vector*/
                 fill(threadEvolutionChecker.begin(), 
                     threadEvolutionChecker.end(), 0);
+                // checker = 0;
             }
 
             /*delete threads*/
@@ -364,7 +418,7 @@ class Executor {
 
             threads.resize(0);
         }
-
+                        
 };
 
 /*a function to check the dimensions of the input grid*/
@@ -406,12 +460,14 @@ int main(int argc, char **argv) {
     InitData.steps = atoi(argv[3]);
     InitData.threads = atoi(argv[4]);
     checkDimensions(InitData.inputFile);
-    //------------------------------------------
-
+    /*-------------------------*/
+    
+    /*printing some states to command line*/
     cout << "threads: " << InitData.threads << endl;
     cout << "steps: " << InitData.steps << endl;
     cout << "rows: " << Dimensions.rows << endl;
     cout << "cols: " << Dimensions.cols << endl << endl;
+    /*------------------------------------*/
 
     auto simulation = Simulation(InitData.inputFile);
     auto executor = Executor();
