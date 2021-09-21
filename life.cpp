@@ -473,6 +473,7 @@ void checkDimensions(const string &input_file) {
 
 class Validator {
     private:
+        /*validate input name using ifstream*/
         bool check_input_name() {
             ifstream test(InitData.input_file);
             if(!test) {
@@ -482,6 +483,7 @@ class Validator {
             return true;
         }
 
+        /*check that steps are 0 or more*/
         bool check_steps() {
             if(InitData.steps < 0) {
                 cout << "invalid step count" << endl;
@@ -490,6 +492,7 @@ class Validator {
             return true;
         }
 
+        /*check that steps are 0 or more*/
         bool check_threads() { 
             if(InitData.threads < 0) {
                 cout << "invalid thread count" << endl;
@@ -501,12 +504,15 @@ class Validator {
     public:
         Validator() {}
 
+        /*all checker needs to be validate*/
         bool validate() {
             int sumEffort = 0;
             sumEffort += check_input_name();
             sumEffort += check_steps();
             sumEffort += check_threads();
+
             if(sumEffort == 3) {
+                /*make user aware anyway if thread count is greater than total cells*/
                 if (InitData.threads > (Dimensions.rows*Dimensions.cols)) {
                     cout << Dimensions.rows*Dimensions.cols << endl;
                     cout << InitData.threads << endl;
