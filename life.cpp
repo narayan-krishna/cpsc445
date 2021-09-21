@@ -26,7 +26,7 @@ struct InitData {
 /*Resident can be dead or alive*/
 class Resident {
     private:
-        int state;
+        bool state;
 
     public:
         Resident(int stated = DEAD) {
@@ -42,11 +42,11 @@ class Resident {
         }
 
         /*Manually set the state of resident*/
-        void setState(int state) {
+        void setState(bool state) {
             this->state = state;
         }
 
-        int getState() {
+        bool getState() {
             return state;
         }
 
@@ -66,14 +66,14 @@ class Neighborhood {
         /**declare 2d array and the dimensions of the grid
          * of dead cells*/
         Resident **residents;
-        int deadrows = Dimensions.rows + 2;
-        int deadcols = Dimensions.cols + 2;
+        size_t deadrows = Dimensions.rows + 2;
+        size_t deadcols = Dimensions.cols + 2;
 
     public:
         /*initialize grid*/
         Neighborhood() {
             residents = new Resident *[deadrows];
-            for(int i = 0; i < deadrows; ++i) {
+            for(size_t i = 0; i < deadrows; ++i) {
                 residents[i] = new Resident[deadcols];
             }
         }
@@ -88,7 +88,7 @@ class Neighborhood {
             ifstream inputStream (inputFile);
             if(inputStream.is_open()) {
                 while(getline (inputStream, currLine)) {
-                    for(int i = 0; i < Dimensions.cols; ++i) {
+                    for(size_t i = 0; i < Dimensions.cols; ++i) {
                         /*convert char to proper int*/
                         currState = (int) currLine.at(i) - 48;
 
@@ -105,7 +105,7 @@ class Neighborhood {
 
         /*delete neighborhood and associated 2d array in dynamic memory*/
         ~Neighborhood() {
-            for(int i = 0; i < deadrows; ++i) {
+            for(size_t i = 0; i < deadrows; ++i) {
                 delete[] residents[i];
             }
             delete[] residents;
@@ -136,8 +136,8 @@ class Neighborhood {
         /*print to console*/
         void print() {
             if(residents) {
-                for(int r = 1; r < Dimensions.rows + 1; ++r) {
-                    for(int c = 1; c < Dimensions.cols + 1; ++c) {
+                for(size_t r = 1; r < Dimensions.rows + 1; ++r) {
+                    for(size_t c = 1; c < Dimensions.cols + 1; ++c) {
                         cout << residents[r][c]; 
                     }
                     cout << endl;
@@ -147,12 +147,14 @@ class Neighborhood {
     
         /*print to file*/
         void printToFile() {
+
+            /*create output stream to outfile, use resident operator overload*/
             ofstream outfile;
             outfile.open (InitData.outputFile, fstream::app);
             if(residents) {
-
-                for(int r = 1; r < Dimensions.rows + 1; ++r) {
-                    for(int c = 1; c < Dimensions.cols + 1; ++c) {
+                
+                for(size_t r = 1; r < Dimensions.rows + 1; ++r) {
+                    for(size_t c = 1; c < Dimensions.cols + 1; ++c) {
                         outfile << residents[r][c]; 
                     }
                     outfile << endl;
@@ -167,9 +169,10 @@ class Neighborhood {
 //an object built for performing simulations using neighborhoods
 class Simulation {
     private:
+
         /*count neighbors of surrounding cell*/
         int countNeighbors(const int &x, const int &y) {
-            int neighborCount = 0;
+            auto neighborCount = 0;
             neighborCount += referenceNeighborhood.getResidentState(x+1, y);
             neighborCount += referenceNeighborhood.getResidentState(x-1, y);
             neighborCount += referenceNeighborhood.getResidentState(x+1, y+1);
@@ -183,7 +186,7 @@ class Simulation {
 
         /*evolve resident based of defined simulation rules*/
         void evolveResident(int x, int y) {
-            int neighborCount = countNeighbors(x, y);
+            auto neighborCount = countNeighbors(x, y);
 
             /*if a resident has few neighbors or too many, kill*/
             if(neighborCount < 2 || neighborCount > 3) {
@@ -226,7 +229,7 @@ class Simulation {
         void evolveRange(int index_start, int index_end) {
             int xCoord, yCoord;
             /*calculate coords based of an index for easier partition*/
-            for(int r = index_start; r < index_end; ++r) {
+            for(size_t r = index_start; r < index_end; ++r) {
                 workingNeighborhood.getResidentCoords(r, xCoord, yCoord);
                 evolveResident(xCoord, yCoord);
             }
@@ -235,8 +238,9 @@ class Simulation {
         /*store the current evolution to the reference for next evo*/
         void storeCurrentState() {
             int currentResidentState;
-            for(int r = 0; r < Dimensions.rows; ++r) {
-                for(int c = 0; c < Dimensions.cols; ++c) {
+
+            for(size_t r = 0; r < Dimensions.rows; ++r) {
+                for(size_t c = 0; c < Dimensions.cols; ++c) {
                     /*copy residents by state*/                    
                     currentResidentState = workingNeighborhood.getResidentState(r,c);
                     if(currentResidentState == DEAD) {
@@ -263,6 +267,7 @@ class Simulation {
 
 /*a class built to execute a simulation by using multiple threads*/
 class Executor {
+
     private:
         /*a vector of threads*/
         /*a vector of corresponding nums representing whether theyve
@@ -298,6 +303,7 @@ class Executor {
         }
 
     public:
+
         Executor() {
             /*vector initialized such that all threads operated*/
             threadEvolutionChecker = vector<size_t>(InitData.threads, 0);
@@ -324,7 +330,7 @@ class Executor {
             for(size_t j = 0; j < InitData.steps; ++j) {
 
                 /*the checker reaches the thread count when all threads finish*/
-                size_t checker = 0;
+                int checker = 0;
                 while(checker != InitData.threads) {
                     /*check the evolution checker all tasks completing*/
                     for(auto i : threadEvolutionChecker) {
@@ -353,6 +359,7 @@ class Executor {
                 thread& t = *threads[k];
                 t.join();
                 delete threads[k]; 
+                cout << "Thread: destroyed" << endl;
             }
 
             threads.resize(0);
@@ -362,6 +369,7 @@ class Executor {
 
 /*a function to check the dimensions of the input grid*/
 void checkDimensions(const string &inputFile) {
+
     string currLine;
     ifstream inputStream (inputFile);
     if(inputStream.is_open()) {
@@ -372,7 +380,7 @@ void checkDimensions(const string &inputFile) {
             /*perform some serious voodoo to avoid whitespace*/
             if(Dimensions.cols == 0) {
                 char currChar;
-                for(int i = 0; i < currLine.length(); ++i) {
+                for(size_t i = 0; i < currLine.length(); ++i) {
                     /*ensure chars are ints*/
                     currChar = currLine.at(i);
                     if(currChar == '0' || currChar == '1') {
@@ -386,6 +394,7 @@ void checkDimensions(const string &inputFile) {
 }
 
 int main(int argc, char **argv) {
+
     if(argc != 5) {
         cout << "program requires four separate args: \n" << "(1) inpute file name, (2) output filename, (3) number of steps, (4) number of threads" << "\n";
         return 0;
@@ -402,11 +411,11 @@ int main(int argc, char **argv) {
     cout << "threads: " << InitData.threads << endl;
     cout << "steps: " << InitData.steps << endl;
     cout << "rows: " << Dimensions.rows << endl;
-    cout << "cols: " << Dimensions.cols << endl;
+    cout << "cols: " << Dimensions.cols << endl << endl;
 
-    Simulation s = Simulation(InitData.inputFile);
-    Executor e = Executor();
-    e.execute(s);
+    auto simulation = Simulation(InitData.inputFile);
+    auto executor = Executor();
+    executor.execute(simulation);
 
     cout << "\nc++ version: " << __cplusplus << "\n" << endl;
 
