@@ -79,9 +79,15 @@ class Neighborhood {
             }
         }
 
-        /*copy a file to grid. file is copied inside the dead cell border*/
+        /*overload -- copy a file to grid. file is copied inside the dead cell border*/
         Neighborhood(const string &input_file) {
-            Neighborhood();
+
+            /*original construction*/
+            residents = new Resident *[deadrows];
+            for(size_t i = 0; i < deadrows; ++i) {
+                residents[i] = new Resident[deadcols];
+            }
+
             string curr_line;
             int curr_row = 0;
             int curr_state = 0;
@@ -158,6 +164,24 @@ class Neighborhood {
         void get_resident_coords(const int &index, int &xCoord, int &yCoord) {
             xCoord = (index % Dimensions.rows);
             yCoord = (index / Dimensions.rows); 
+        }
+
+        /*copy from another neighborhood*/
+        void copy(Neighborhood &from) {
+            int current_resident_state;
+
+            for(size_t r = 0; r < Dimensions.rows; ++r) {
+                for(size_t c = 0; c < Dimensions.cols; ++c) {
+                    /*copy residents by state*/                    
+                    current_resident_state = from.get_resident_state(r,c);
+                    if(current_resident_state == DEAD) {
+                       kill_resident(r,c);
+                    } else {
+                       animate_resident(r,c);
+                    }
+
+                }
+            }
         }
 
         /*print to console*/
@@ -238,8 +262,8 @@ class Simulation {
         }
 
         Simulation(Neighborhood &input_neighborhood) {
-            reference_neighborhood.file_to_neighborhood(InitData.input_file);
-            working_neighborhood.file_to_neighborhood(InitData.input_file);
+            reference_neighborhood.copy(input_neighborhood);
+            working_neighborhood.copy(input_neighborhood);
         }
 
         /*ensure destruction when simulation goes out of scope*/
@@ -447,6 +471,54 @@ void checkDimensions(const string &input_file) {
     }
 }
 
+class Validator {
+    private:
+        bool check_input_name() {
+            ifstream test(InitData.input_file);
+            if(!test) {
+                cout << "input file invalid" << endl;
+                return false;
+            }
+            return true;
+        }
+
+        bool check_steps() {
+            if(InitData.steps < 0) {
+                cout << "invalid step count" << endl;
+                return false;
+            }
+            return true;
+        }
+
+        bool check_threads() { 
+            if(InitData.threads < 0) {
+                cout << "invalid thread count" << endl;
+                return false;
+            }
+            return true;
+        }
+
+    public:
+        Validator() {}
+
+        bool validate() {
+            int sumEffort = 0;
+            sumEffort += check_input_name();
+            sumEffort += check_steps();
+            sumEffort += check_threads();
+            if(sumEffort == 3) {
+                if (InitData.threads > (Dimensions.rows*Dimensions.cols)) {
+                    cout << Dimensions.rows*Dimensions.cols << endl;
+                    cout << InitData.threads << endl;
+                    cout << "ineffecient thread count" << endl;
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+
 int main(int argc, char **argv) {
 
     if(argc != 5) {
@@ -460,17 +532,24 @@ int main(int argc, char **argv) {
     InitData.steps = atoi(argv[3]);
     InitData.threads = atoi(argv[4]);
     checkDimensions(InitData.input_file);
-    /*-------------------------*/
+
+    /*validating input*/
+    Validator v = Validator();
+    if(v.validate() == false){
+        return 0;
+    }
     
     /*printing some states to command line*/
     cout << "threads: " << InitData.threads << endl;
     cout << "steps: " << InitData.steps << endl;
     cout << "rows: " << Dimensions.rows << endl;
     cout << "cols: " << Dimensions.cols << endl << endl;
-    /*------------------------------------*/
-
-    auto simulation = Simulation(InitData.input_file);
+    
+    /*make neighborhood -> enter it into simulator -> execute simulation*/
+    auto neighborhood = Neighborhood(InitData.input_file);
+    auto simulation = Simulation(neighborhood);
     auto executor = Executor();
+
     executor.execute(simulation);
 
     cout << "\nc++ version: " << __cplusplus << "\n" << endl;
