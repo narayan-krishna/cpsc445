@@ -158,41 +158,42 @@ class Simulation {
         Neighborhood workingNeighborhood;
 
         int countNeighbors(const int &x, const int &y) {
-
-            int count = 0;
-            int index = x + Dimensions.rows*y;
-
-            vector<int>neighbors {
-                index - 1,
-                index + 1,  
-                index - Dimensions.rows,
-                index + Dimensions.rows,
-                index + Dimensions.rows - 1,
-                index + Dimensions.rows + 1, 
-                index - Dimensions.rows - 1, 
-                index - Dimensions.rows + 1 
-            };
-
-            int xCoord, yCoord;
-            for(auto n : neighbors) {
-                if(n >= 0) {
-                    referenceNeighborhood.getResidentCoords(n, xCoord, yCoord);
-                    if(referenceNeighborhood.getResidentState(xCoord,yCoord) == 1) {
-                        count ++;
-                    }
-                }
-            }
-
-                return count;
-       }
+        }
 
         void evolveResident(const int &x, const int &y) {
             int neighborCount = countNeighbors(x, y);
-            if(neighborCount < 2 || neighborCount > 3){
-                workingNeighborhood.killResident(x, y);
+            int state = workingNeighborhood.getResidentState(x,y);
+            if(state == ALIVE) {
+                if(neighborCount != 2 && neighborCount != 3) {
+                    workingNeighborhood.killResident(x, y);
+                }
             }else if(neighborCount == 3){
-                workingNeighborhood.animateResident(x, y);
+                workingNeighborhood.animateResident(x,y);
+            }else{
+                workingNeighborhood.killResident(x, y);
             }
+            // if(neighborCount < 2){
+            //     workingNeighborhood.killResident(x, y);
+            // }else if(neighborCount == 2){
+            //     if(){
+            //         workingNeighborhood.animateResident();
+            // }
+            // if(neighbors < 2){
+            //     temp->killCell(i,j);
+            // }
+            // if(neighbors == 2){
+            //     if(grid->getCell(i,j).getStatus() == true){
+            //     temp->animateCell(i,j);
+            //     }else{
+            //     temp->killCell(i,j);
+            //     }
+            // }
+            // if(neighbors == 3){
+            //     temp->animateCell(i,j);
+            // }
+            // if(neighbors > 3){
+            //     temp->killCell(i,j);
+            // }
             // if(referenceNeighborhood.getResidentState(x,y) == DEAD) {
             //     workingNeighborhood.animateResident(x, y);
             // }else{
