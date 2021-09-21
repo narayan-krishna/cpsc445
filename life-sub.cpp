@@ -55,14 +55,12 @@ class Resident {
 class Neighborhood {
     private:
         Resident **residents;
-        int deadrows = Dimensions.rows + 2;
-        int deadcols = Dimensions.cols + 2;
 
     public:
         Neighborhood() {
-            residents = new Resident *[deadrows];
-            for(int i = 0; i < deadrows; ++i) {
-                residents[i] = new Resident[deadcols];
+            residents = new Resident *[Dimensions.rows];
+            for(int i = 0; i < Dimensions.rows; ++i) {
+                residents[i] = new Resident[Dimensions.cols];
             }
         }
 
@@ -80,7 +78,7 @@ class Neighborhood {
                             cout << "X";
                         }
                         if(currState == 0 || currState == 1) {
-                            residents[currRow + 1][i + 1].setState(currState);
+                            residents[currRow][i].setState(currState);
                         }
                     }
                     currRow ++;
@@ -90,7 +88,7 @@ class Neighborhood {
         }
 
         ~Neighborhood() {
-            for(int i = 0; i < deadrows; ++i) {
+            for(int i = 0; i < Dimensions.rows; ++i) {
                 delete[] residents[i];
             }
             delete[] residents;
@@ -98,15 +96,15 @@ class Neighborhood {
         }
 
         void killResident(const int &x, const int &y) {
-            residents[x+1][y+1].kill();
+            residents[x][y].kill();
         }
 
         void animateResident(const int &x, const int &y) {
-            residents[x+1][y+1].animate();
+            residents[x][y].animate();
         }
 
         int getResidentState(const int &x, const int &y) {
-            return residents[x+1][y+1].getState();
+            return residents[x][y].getState();
         }
 
         void getResidentCoords(const int &index, int &xCoord, int &yCoord) {
@@ -116,8 +114,8 @@ class Neighborhood {
 
         void print() {
             if(residents) {
-                for(int r = 1; r < Dimensions.rows + 1; ++r) {
-                    for(int c = 1; c < Dimensions.cols + 1; ++c) {
+                for(int r = 0; r < Dimensions.rows; ++r) {
+                    for(int c = 0; c < Dimensions.cols; ++c) {
                         cout << residents[r][c]; 
                     }
                     cout << endl;
@@ -129,8 +127,8 @@ class Neighborhood {
             ofstream outfile;
             outfile.open (InitData.outputFile, fstream::app);
             if(residents){
-                for(int r = 1; r < Dimensions.rows + 1; ++r) {
-                    for(int c = 1; c < Dimensions.cols + 1; ++c) {
+                for(int r = 0; r < Dimensions.rows; ++r) {
+                    for(int c = 0; c < Dimensions.cols; ++c) {
                         outfile << residents[r][c]; 
                     }
                     outfile << endl;
@@ -144,11 +142,33 @@ class Neighborhood {
 //an object built for performing simulations using neighborhoods
 class Simulation {
     private:
-
-
-    public:
         Neighborhood referenceNeighborhood;
         Neighborhood workingNeighborhood;
+
+        int countNeighbors(const int &x, const int &y) {
+            return 0;
+        }
+
+        void evolveResident(const int &x, const int &y) {
+            // int neighborCount = countNeighbors(x, y);
+            // int state = workingNeighborhood.getResidentState(x,y);
+            // if(state == ALIVE) {
+            //     if(neighborCount != 2 && neighborCount != 3) {
+            //         workingNeighborhood.killResident(x, y);
+            //     }
+            // }else if(neighborCount == 3){
+            //     workingNeighborhood.animateResident(x,y);
+            // }else{
+            //     workingNeighborhood.killResident(x, y);
+            // }
+            if(workingNeighborhood.getResidentState(x,y) == DEAD){
+                workingNeighborhood.animateResident(x,y);
+            }else{
+                workingNeighborhood.killResident(x, y);
+            }
+        }
+
+    public:
         Simulation(const string &inputFile) {
 
             referenceNeighborhood.fileToNeighborhood(InitData.inputFile);
@@ -174,52 +194,6 @@ class Simulation {
                 workingNeighborhood.getResidentCoords(r, xCoord, yCoord);
                 evolveResident(xCoord, yCoord);
             }
-        }
-        int countNeighbors(int x, int y) {
-            int neighborCount = 0;
-            //x + 1, y
-            neighborCount += referenceNeighborhood.getResidentState(x+1, y);
-            //x - 1, yreferenceNeighborhood
-            neighborCount += referenceNeighborhood.getResidentState(x-1, y);
-            //x + 1, y+1,referenceNeighborhood
-            neighborCount += referenceNeighborhood.getResidentState(x+1, y+1);
-            //x - 1, y-1referenceNeighborhood
-            neighborCount += referenceNeighborhood.getResidentState(x-1, y-1);
-            //x, y+1referenceNeighborhood
-            neighborCount += referenceNeighborhood.getResidentState(x, y+1);
-            //x, y-1referenceNeighborhood
-            neighborCount += referenceNeighborhood.getResidentState(x, y-1);
-            //x + 1, y-1referenceNeighborhood
-            neighborCount += referenceNeighborhood.getResidentState(x+1, y-1);
-            //x - 1, y+1referenceNeighborhood
-            neighborCount += referenceNeighborhood.getResidentState(x-1, y+1);
-            return neighborCount;
-        }
-
-        void evolveResident(int x, int y) {
-            int neighborCount = countNeighbors(x, y);
-            // int state = workingNeighborhood.getResidentState(x,y);
-            // if(state == ALIVE) {
-            //     if(neighborCount != 2 && neighborCount != 3) {
-            //         workingNeighborhood.killResident(x, y);
-            //     }
-            // }else if(neighborCount == 3){
-            //     workingNeighborhood.animateResident(x,y);
-            // }
-            if(neighborCount < 2 || neighborCount > 3){
-                workingNeighborhood.killResident(x,y);
-            }else if(neighborCount == 3){
-                workingNeighborhood.animateResident(x,y);
-            }
-            // if(neighborCount > 0){
-            //     workingNeighborhood.animateResident(x,y);
-            // }
-            // if(workingNeighborhood.getResidentState(x,y) == DEAD){
-            //     workingNeighborhood.animateResident(x,y);
-            // }else{
-            //     workingNeighborhood.killResident(x, y);
-            // }
-            neighborCount = 0;
         }
 
         void storeCurrentState() {
@@ -284,7 +258,6 @@ class Executor {
         }
 
         void execute(Simulation &s) {
-            // s.workingNeighborhood.animateResident(3,4);
             // s.print();
             s.printToFile();
             for(size_t i = 0; i < InitData.threads; ++i) {
@@ -362,35 +335,8 @@ int main(int argc, char **argv) {
     cout << "steps: " << InitData.steps << endl;
     cout << "rows: " << Dimensions.rows << endl;
     cout << "cols: " << Dimensions.cols << endl;
-    // Neighborhood n = Neighborhood();
-    // n.fileToNeighborhood(InitData.inputFile);
-    // n.print();
-    // n.animateResident(2,3);
-    // cout << endl;
-    // n.print();
-    // cout << n.getResidentState(2,3) << endl;
-    // cout << n.getResidentState(3,7) << endl;
-    // int x = 2; int y = 3; int count = 0;
-    // count += n.getResidentState(x+1, y);
-    
-    // count += n.getResidentState(x-1, y);
-    
-    // count += n.getResidentState(x+1, y+1);
-    
-    // count += n.getResidentState(x-1, y-1);
-    
-    // count += n.getResidentState(x, y+1);
-    
-    // count += n.getResidentState(x, y-1);
-    
-    // count += n.getResidentState(x+1, y-1);
-    
-    // count += n.getResidentState(x-1, y+1);
-    // cout << count + 1<< endl;
 
     Simulation s = Simulation(InitData.inputFile);
-    // s.evolve();
-    // s.print();
     Executor e = Executor();
     e.execute(s);
     cout << "\nc++ version: " << __cplusplus << "\n" << endl;
