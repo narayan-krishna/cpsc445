@@ -2,8 +2,11 @@
 #include <fstream>
 #include <string>
 #include <thread>
+#include <condition_variable>
+#include <mutex>
 #include <unistd.h>
 #include <vector>
+#include <condition_variable>
 using namespace std;
 
 enum cell_state { DEAD, ALIVE };
@@ -324,16 +327,24 @@ class Simulation {
 class Executor {
 
     private:
-        /*a vector of threads*/
-        /*a vector of corresponding nums representing whether theyve
-        finished evolution*/
+
+        vector<int> thread_evolution_checker;
         vector<thread*> threads;
-        vector<size_t>thread_evolution_checker;
+        vector<mutex*> mutexes;
+        condition_variable *condition;
+
+        bool sum_checker(){
+            int sum = 0;
+            for(auto &n : thread_evolution_checker) {
+                sum += n;
+            }
+            return (sum == InitData.threads);
+        }
 
         /*a task for threads to execute*/
         /*a thread's rank is used to determine that range of values
         on which it will operate*/
-        void evolve_task(size_t rank, Simulation &s, size_t rows, 
+        auto evolve_task(const size_t rank, Simulation &s, size_t rows, 
                         size_t cols, size_t threads, size_t steps) {
             
             /*calculate partition by rank, thread count, and grid size*/
@@ -347,15 +358,18 @@ class Executor {
             
             /*operate evolution over the determined range for the input steps*/
             for(size_t i = 0; i < steps; ++i) {
-                // /*block if range has already been evolved*/
-                /*unlocks when all threads have evolved their ranges*/
-                while(thread_evolution_checker[rank] == 1) {}
 
-                /*range needs to be evolved. proceed here*/
+                // thread_evolution_checker[rank] = 1;
+                unique_lock<mutex> mutex_lock(*mutexes[rank]);
+                condition[1].wait(mutex_lock, [&, rank]{
+                    return (thread_evolution_checker[rank] == 0);
+                });
+
                 s.evolve_range(index_start, index_end);
-                /*establish that this rank has finished evolution*/
                 thread_evolution_checker[rank] = 1;
-            // }
+
+                condition[0].notify_one();
+                mutex_lock.unlock();
             }
         }
 
@@ -363,10 +377,19 @@ class Executor {
 
         Executor() {
             /*vector initialized such that all threads operated*/
-            thread_evolution_checker = vector<size_t>(InitData.threads, 0);
+            thread_evolution_checker = vector<int>(InitData.threads, 0);
+            for(size_t i = 0; i < InitData.threads + 2; ++i){
+                mutexes.push_back(new mutex);
+            }
+            condition = new condition_variable[2];
+            // condition = condition_variable condition[2];
         }
             
         ~Executor() {
+            delete[] condition;
+            for(size_t i = 0; i < InitData.threads + 2; ++i){
+                delete mutexes[i];
+            }
             cout << "Executor: destroyed" << endl;
         }
 
@@ -374,30 +397,6 @@ class Executor {
         void execute(Simulation &s) {
             /*print the initial grid for reference*/
             s.print_to_file();
-
-            /*allocating thread for each step -- much faster*/
-            // for(size_t st = 0; st < InitData.steps; ++st){
-
-            //     /*create threads and push them to thread vector*/
-            //     for(size_t i = 0; i < InitData.threads; ++i) {
-            //         threads.push_back(new thread([&,i]() {
-            //             evolve_task(i, s, Dimensions.rows, Dimensions.cols,
-            //                     InitData.threads, InitData.steps);
-            //             }));
-            //     }
-
-            //     s.print_to_file();
-            //     s.store_current_state();
-
-            //     for(size_t k = 0; k < InitData.threads; ++k) {
-            //         thread& t = *threads[k];
-            //         t.join();
-            //         delete threads[k]; 
-            //         // cout << "Thread: destroyed" << endl;
-            //     }
-
-            //     threads.resize(0);
-            // }
 
             /*or locking them using the main program*/
             for(size_t i = 0; i < InitData.threads; ++i) {
@@ -408,28 +407,18 @@ class Executor {
             }
 
             for(size_t j = 0; j < InitData.steps; ++j) {
-                /*the checker reaches the thread count when all threads finish*/
-                int checker = 0;
-                while(checker != InitData.threads) {
-                    /*check the evolution checker all tasks completing*/
-                    for(auto i : thread_evolution_checker) {
-                        checker = checker + i;
-                    }
-                    /*if they haven't, reset for another check*/
-                    if(checker != InitData.threads) {
-                        checker = 0;
-                    }
-                    /*if they have, while loop will be passed*/
-                }
+                unique_lock<mutex> mutex_lock(*mutexes[InitData.threads]);
+                condition[0].wait(mutex_lock, [&]{return sum_checker();});
 
-                /*print results and begin again*/ 
                 s.print_to_file();
                 s.store_current_state();
 
-                /*reset checker vector*/
                 fill(thread_evolution_checker.begin(), 
                     thread_evolution_checker.end(), 0);
-                // checker = 0;
+
+                /*notify all*/
+                condition[1].notify_all();
+                mutex_lock.unlock();
             }
 
             /*delete threads*/
@@ -437,7 +426,7 @@ class Executor {
                 thread& t = *threads[k];
                 t.join();
                 delete threads[k]; 
-                cout << "Thread: destroyed" << endl;
+                // cout << "Thread: destroyed" << endl;
             }
 
             threads.resize(0);
@@ -549,7 +538,7 @@ int main(int argc, char **argv) {
     cout << "threads: " << InitData.threads << endl;
     cout << "steps: " << InitData.steps << endl;
     cout << "rows: " << Dimensions.rows << endl;
-    cout << "cols: " << Dimensions.cols << endl << endl;
+    cout << "cols: " << Dimensions.cols << endl;
     
     /*make neighborhood -> enter it into simulator -> execute simulation*/
     auto neighborhood = Neighborhood(InitData.input_file);
