@@ -2,10 +2,9 @@
 #include <fstream>
 #include <string>
 #include <thread>
-#include <condition_variable>
-#include <mutex>
 #include <unistd.h>
 #include <vector>
+#include <mutex>
 #include <condition_variable>
 using namespace std;
 
@@ -333,6 +332,7 @@ class Executor {
         vector<mutex*> mutexes;
         condition_variable *condition;
 
+        /*a function that acts a condition variable for main to proceed with procesisng*/
         bool sum_checker(){
             int sum = 0;
             for(auto &n : thread_evolution_checker) {
@@ -359,15 +359,17 @@ class Executor {
             /*operate evolution over the determined range for the input steps*/
             for(size_t i = 0; i < steps; ++i) {
 
-                // thread_evolution_checker[rank] = 1;
+                /*create a mutex lock that unlocks based on condition (corresponding thread check is 0)*/
                 unique_lock<mutex> mutex_lock(*mutexes[rank]);
                 condition[1].wait(mutex_lock, [&, rank]{
                     return (thread_evolution_checker[rank] == 0);
                 });
 
+                /*process range*/
                 s.evolve_range(index_start, index_end);
                 thread_evolution_checker[rank] = 1;
 
+                /*notify to check main condition*/
                 condition[0].notify_one();
                 mutex_lock.unlock();
             }
@@ -406,13 +408,18 @@ class Executor {
                     }));
             }
 
+            /*(main) "thread" running concurrently with execution threads*/
             for(size_t j = 0; j < InitData.steps; ++j) {
+
+                /*use similar mutex lock technique but condition waits on checker*/
                 unique_lock<mutex> mutex_lock(*mutexes[InitData.threads]);
                 condition[0].wait(mutex_lock, [&]{return sum_checker();});
 
+                /*process*/
                 s.print_to_file();
                 s.store_current_state();
 
+                /*empty the checker vector and begin again*/
                 fill(thread_evolution_checker.begin(), 
                     thread_evolution_checker.end(), 0);
 
@@ -444,7 +451,7 @@ void checkDimensions(const string &input_file) {
         while(getline (input_stream, curr_line)) {
             Dimensions.rows++;
 
-            /*perform some serious voodoo to avoid whitespace*/
+            /*ensure the the right number of columns is being calcualed*/
             if(Dimensions.cols == 0) {
                 char curr_char;
                 for(size_t i = 0; i < curr_line.length(); ++i) {
@@ -460,6 +467,7 @@ void checkDimensions(const string &input_file) {
     }
 }
 
+/*validate input object*/
 class Validator {
     private:
         /*validate input name using ifstream*/
