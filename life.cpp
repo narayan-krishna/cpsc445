@@ -418,7 +418,6 @@ class Executor {
                 condition[0].wait(mutex_lock, [&]{return sum_checker();});
 
                 /*process*/
-                s.print_to_file();
                 s.store_current_state();
 
                 /*empty the checker vector and begin again*/
@@ -439,6 +438,7 @@ class Executor {
             }
 
             threads.resize(0);
+            s.print_to_file();
         }
                         
 };
