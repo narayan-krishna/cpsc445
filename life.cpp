@@ -398,7 +398,9 @@ class Executor {
         /*execute the simulation to user output. employ threads*/
         void execute(Simulation &s) {
             /*print the initial grid for reference*/
-            s.print_to_file();
+            if(InitData.steps == 0){
+                s.print_to_file();
+            }
 
             /*or locking them using the main program*/
             for(size_t i = 0; i < InitData.threads; ++i) {
