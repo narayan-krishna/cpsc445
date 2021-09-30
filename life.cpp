@@ -226,14 +226,14 @@ class Simulation {
         /*count neighbors of surrounding cell*/
         int count_neighbors(const int &x, const int &y) {
             auto neighbor_count = 0;
-            neighbor_count += reference_neighborhood.get_resident_state(x+1, y);
-            neighbor_count += reference_neighborhood.get_resident_state(x-1, y);
-            neighbor_count += reference_neighborhood.get_resident_state(x+1, y+1);
-            neighbor_count += reference_neighborhood.get_resident_state(x-1, y-1);
-            neighbor_count += reference_neighborhood.get_resident_state(x, y+1);
-            neighbor_count += reference_neighborhood.get_resident_state(x, y-1);
-            neighbor_count += reference_neighborhood.get_resident_state(x+1, y-1);
-            neighbor_count += reference_neighborhood.get_resident_state(x-1, y+1);
+            neighbor_count += reference_neighborhood->get_resident_state(x+1, y);
+            neighbor_count += reference_neighborhood->get_resident_state(x-1, y);
+            neighbor_count += reference_neighborhood->get_resident_state(x+1, y+1);
+            neighbor_count += reference_neighborhood->get_resident_state(x-1, y-1);
+            neighbor_count += reference_neighborhood->get_resident_state(x, y+1);
+            neighbor_count += reference_neighborhood->get_resident_state(x, y-1);
+            neighbor_count += reference_neighborhood->get_resident_state(x+1, y-1);
+            neighbor_count += reference_neighborhood->get_resident_state(x-1, y+1);
             return neighbor_count;
         }
 
@@ -243,10 +243,10 @@ class Simulation {
 
             /*if a resident has few neighbors or too many, kill*/
             if(neighbor_count < 2 || neighbor_count > 3) {
-                working_neighborhood.kill_resident(x,y);
+                working_neighborhood->kill_resident(x,y);
             /*if a dead cell has three neighbors, bring to life*/
             }else if(neighbor_count == 3) {
-                working_neighborhood.animate_resident(x,y);
+                working_neighborhood->animate_resident(x,y);
             }
 
         }
@@ -254,71 +254,49 @@ class Simulation {
     public:
         /*two neighborhoods declared. one is the current being worked on,
         making decisions based on previous iteration of simulation (reference)*/
-        Neighborhood reference_neighborhood;
-        Neighborhood working_neighborhood;
-
-        /*initialize neighborhoods from file*/
-        Simulation(const string &input_file) {
-            reference_neighborhood.file_to_neighborhood(InitData.input_file);
-            working_neighborhood.file_to_neighborhood(InitData.input_file);
-        }
+        Neighborhood *reference_neighborhood;
+        Neighborhood *working_neighborhood;
 
         Simulation(Neighborhood &input_neighborhood) {
-            reference_neighborhood.copy(input_neighborhood);
-            working_neighborhood.copy(input_neighborhood);
+            reference_neighborhood = new Neighborhood(InitData.input_file);
+            working_neighborhood = new Neighborhood(InitData.input_file);
+
+            reference_neighborhood->copy(input_neighborhood);
+            working_neighborhood->copy(input_neighborhood);
         }
 
         /*ensure destruction when simulation goes out of scope*/
         ~Simulation() {
+            delete reference_neighborhood;
+            delete working_neighborhood;
             cout << "Simulation: destroyed" << endl;
         }
-
-        /*evolve entire working neighborhood by previously defined ruleset*/
-        void evolve() {
-            for(int r = 0; r < Dimensions.rows; ++r) {
-                for(int c = 0; c < Dimensions.cols; ++c) {
-                    evolve_resident(r, c);
-                }
-            }
-        }            
 
         /*evolve a range of residents given ruleset. useful for partitioning*/
         void evolve_range(int index_start, int index_end) {
             int x_coord, y_coord;
             /*calculate coords based of an index for easier partition*/
             for(size_t r = index_start; r < index_end; ++r) {
-                working_neighborhood.get_resident_coords(r, x_coord, y_coord);
+                working_neighborhood->get_resident_coords(r, x_coord, y_coord);
                 evolve_resident(x_coord, y_coord);
             }
         }
 
         /*store the current evolution to the reference for next evo*/
         void store_current_state() {
-            int current_resident_state;
+            swap(working_neighborhood, reference_neighborhood);
 
-            for(size_t r = 0; r < Dimensions.rows; ++r) {
-                for(size_t c = 0; c < Dimensions.cols; ++c) {
-                    /*copy residents by state*/                    
-                    current_resident_state = working_neighborhood.get_resident_state(r,c);
-                    if(current_resident_state == DEAD) {
-                        reference_neighborhood.kill_resident(r,c);
-                    } else {
-                        reference_neighborhood.animate_resident(r,c);
-                    }
-
-                }
-            }
         }
 
         /*print to sim state*/
         void print() {
-            working_neighborhood.print();
+            working_neighborhood->print();
             cout << endl;
         }
 
         /*print sim state to file*/
         void print_to_file() {
-            working_neighborhood.print_to_file();
+            working_neighborhood->print_to_file();
         }
 };
 
@@ -397,10 +375,6 @@ class Executor {
 
         /*execute the simulation to user output. employ threads*/
         void execute(Simulation &s) {
-            /*print the initial grid for reference*/
-            // if(InitData.steps == 0){
-            //     s.print_to_file();
-            // }
 
             /*or locking them using the main program*/
             for(size_t i = 0; i < InitData.threads; ++i) {
