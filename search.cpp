@@ -22,35 +22,43 @@ public:
 SearchData data;
 map<string, int> keywords;
 vector<string> text_lines;
+vector<int> nums {0, 1, 2};
 
 Search(SearchData d) {
     data = d;
-    cout << "here" << endl;
     process_keyword_file();
-    print_keywords();
     process_text_file();
-    print_text();
+    search_lines(nums);
+    print_keywords();
 }
 
-// void search_lines(vector<int> &line_nums) { 
-//     for(int n : line_nums) {
+void search_lines(vector<int> &line_nums) { 
+    for(int n : line_nums) {
 
-//         string current_line = text_lines[n];
-//         int current_line_len = current_line.length();
+        string current_line = text_lines[n];
+        int current_line_len = current_line.length();
 
-//         int i = 0;
-//         for(int j = 0; j < current_line_len; j++) {
-//             if(curr_line.at(j) == ' ') {
-//                 string word = current_line.substring(i, j);
-//                 if(key_words.find(word)) {
-//                     key_words[word]++;
-//                 }
-//                 cout << "word" << endl;
-//                 i ++;
-//             }
-//         }
-//     }
-// }
+        // for(int j = 0; j < current_line_len; j++) {
+        int i = 0; int j = 0; 
+        int relative_diff = 0;
+
+        while(i < current_line_len && j < current_line_len) {
+            if(current_line.at(j) == ' ' || current_line.at(j) == '.') {
+                string word = current_line.substr(i, relative_diff);
+                if(keywords.find(word) != keywords.end()) {
+                    keywords[word]++;
+                }
+                j++;
+                i = j;
+                relative_diff = 0;
+                //add for j to continue over the rest of whitespace
+            } else {
+                j++;
+                relative_diff++;
+            }
+        }
+    }
+}
 
 void process_keyword_file() {
     string curr_line; 
