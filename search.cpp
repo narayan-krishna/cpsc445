@@ -22,14 +22,13 @@ public:
 SearchData data;
 map<string, int> keywords;
 vector<string> text_lines;
-vector<int> nums {0, 1, 2};
+mutex keyword_protection;
+vector<int> nums {0 , 2};
 
 Search(SearchData d) {
     data = d;
     process_keyword_file();
     process_text_file();
-    search_lines(nums);
-    print_keywords();
 }
 
 void search_lines(vector<int> &line_nums) { 
@@ -45,8 +44,11 @@ void search_lines(vector<int> &line_nums) {
         while(i < current_line_len && j < current_line_len) {
             if(current_line.at(j) == ' ' || current_line.at(j) == '.') {
                 string word = current_line.substr(i, relative_diff);
-                if(keywords.find(word) != keywords.end()) {
-                    keywords[word]++;
+                {
+                    lock_guard<mutex> lock(keyword_protection);
+                    if(keywords.find(word) != keywords.end()) {
+                        keywords[word]++;
+                    }
                 }
                 j++;
                 i = j;
@@ -58,6 +60,10 @@ void search_lines(vector<int> &line_nums) {
             }
         }
     }
+}
+
+int get_text_size() {
+    return text_lines.size();
 }
 
 void process_keyword_file() {
@@ -102,6 +108,44 @@ void print_text() {
 
 };
 
+class Executor{
+private:
+    vector<thread*> threads;
+    int thread_count;
+
+    void thread_task(int rank, Search &s) {
+        vector<int> alloc_lines;
+        //i is line number, thread_count is thread count
+        for (int line_num = 0; line_num < s.get_text_size(); line_num ++) {
+            if(line_num % thread_count == rank) {
+                alloc_lines.push_back(line_num);
+            }
+        }
+        s.search_lines(alloc_lines); 
+    }
+
+public:
+    Executor(int thread_count){
+       this->thread_count = thread_count; 
+    }
+
+    ~Executor(){}
+
+    void execute(Search &s) {
+        for(int i = 0; i < thread_count; i++) {
+            threads.push_back(new thread([&, i]{ thread_task(i, s); }));
+        }
+
+        // cout << "processing..." << endl;
+
+        for(int i = 0; i < thread_count; i++) {
+            thread& t = *threads[i];
+            t.join();
+            delete threads[i];
+        }
+    }
+};
+
 
 
 int main(int argc, char **argv) {
@@ -115,14 +159,11 @@ int main(int argc, char **argv) {
     int thread_count = stoi(argv[4]);
 
     Search s(search_input);
+    Executor e(thread_count);
 
+    e.execute(s);
+    s.print_keywords();
 
     return 0;
 }
 
-
-//planning
-
-//use an unordered map to process the first file
-//tbd
-//use a vector of vectors to store file -- or maybe I could do it on the fly?
