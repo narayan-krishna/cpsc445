@@ -1,0 +1,3 @@
+dog, 1
+hippo, 3
+mouse, 2

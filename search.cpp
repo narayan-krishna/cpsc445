@@ -5,7 +5,6 @@
 #include <map>
 #include <thread>
 #include <mutex>
-#include <condition_variable>
 
 using namespace std;
 
@@ -92,16 +91,25 @@ void process_text_file() {
     }
 }
 
+void print_text() {
+    for (auto &n : text_lines) {
+        cout << n << endl;
+    }
+}
+
 void print_keywords() {
     for (auto &n : keywords) {
         cout << n.first << ", " << n.second << endl;
     }
 }
 
-void print_text() {
-    for (auto &n : text_lines) {
-        cout << n << endl;
+void print_keywords_to_file() {
+    ofstream outfile;
+    outfile.open(data.output_file_name, fstream::app);
+    for (auto &n : keywords) {
+        outfile << n.first << ", " << n.second << endl;
     }
+    outfile.close();
 }
 
 ~Search(){}
@@ -162,7 +170,7 @@ int main(int argc, char **argv) {
     Executor e(thread_count);
 
     e.execute(s);
-    s.print_keywords();
+    s.print_keywords_to_file();
 
     return 0;
 }

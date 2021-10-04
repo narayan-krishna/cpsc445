@@ -12,4 +12,4 @@ EOF
 ./a.out keywords.txt sometext.txt output.txt 4
 cat output.txt
 
-rm keywords.txt sometext.txt output.txt
+rm keywords.txt sometext.txt
