@@ -53,7 +53,10 @@ void search_lines(vector<int> &line_nums) {
                 i = j;
                 relative_diff = 0;
                 //add for j to continue over the rest of whitespace
-            } else {
+            } else if(j == current_line_len - 1) {
+                
+            }
+            else {
                 j++;
                 relative_diff++;
             }
@@ -80,12 +83,15 @@ void process_keyword_file() {
 
 void process_text_file() {
     string curr_line;
+    bool end_char;
 
     ifstream input_stream (data.text);
     if(input_stream.is_open()) {
 
         while(getline (input_stream, curr_line)) {
-            text_lines.push_back(curr_line);             
+            int end = curr_line.length() - 1;
+            end_char = curr_line.at(end) == ' ' || curr_line.at(end) == '.';
+            text_lines.push_back(curr_line + (end_char ? "" : " "));             
         }
         input_stream.close();
     }
