@@ -107,7 +107,7 @@ void print_keywords_to_file() {
     ofstream outfile;
     outfile.open(data.output_file_name, fstream::app);
     for (auto &n : keywords) {
-        outfile << n.first << ", " << n.second << endl;
+        outfile << n.first << " " << n.second << endl;
     }
     outfile.close();
 }
