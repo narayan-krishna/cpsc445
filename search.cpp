@@ -21,8 +21,7 @@ public:
 SearchData data;
 map<string, int> keywords;
 vector<string> text_lines;
-mutex keyword_protection;
-vector<int> nums {0 , 2};
+
 
 Search(SearchData d) {
     data = d;
@@ -31,6 +30,7 @@ Search(SearchData d) {
 }
 
 void search_lines(vector<int> &line_nums) { 
+    mutex keyword_protection;
     for(int n : line_nums) {
 
         string current_line = text_lines[n];
@@ -38,12 +38,12 @@ void search_lines(vector<int> &line_nums) {
 
         // for(int j = 0; j < current_line_len; j++) {
         int i = 0; int j = 0; 
-        int relative_diff = 0;
-
         while(i < current_line_len && j < current_line_len) {
             if(current_line.at(j) == ' ' || current_line.at(j) == '.') {
-                string word = current_line.substr(i, relative_diff);
+                string word = current_line.substr(i, j - i);
                 {
+                    /*using a lockguard here because atomic types seem to break 
+                      my computer*/
                     lock_guard<mutex> lock(keyword_protection);
                     if(keywords.find(word) != keywords.end()) {
                         keywords[word]++;
@@ -51,15 +51,8 @@ void search_lines(vector<int> &line_nums) {
                 }
                 j++;
                 i = j;
-                relative_diff = 0;
-                //add for j to continue over the rest of whitespace
-            } else if(j == current_line_len - 1) {
-                
-            }
-            else {
-                j++;
-                relative_diff++;
-            }
+            } 
+            j ++;
         }
     }
 }
@@ -180,4 +173,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
