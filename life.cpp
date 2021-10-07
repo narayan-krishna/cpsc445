@@ -7,6 +7,7 @@
 #include <mutex>
 #include <condition_variable>
 using namespace std;
+/*for ci*/
 
 enum cell_state { DEAD, ALIVE };
 
