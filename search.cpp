@@ -8,48 +8,62 @@
 
 using namespace std;
 
-
+/*a struct to hold search data*/
 struct SearchData{
     string keyword_list;
     string text;
     string output_file_name;
 };
 
+/*an instance of a search:
+ *take in a file, and a list of words to search for.*/
 class Search{
 public:
 
+/*declare storage for data, a map for keyword counts,
+ *and a vector text_lines */
 SearchData data;
 map<string, int> keywords;
 vector<string> text_lines;
 
 
+/*construct a search based on input data*/
 Search(SearchData d) {
     data = d;
     process_keyword_file();
     process_text_file();
 }
 
-void search_lines(vector<int> &line_nums) { 
+/*search the given lines for keywords. update their counts*/
+void search_lines(vector<int> &line_nums) {
+    /*use a mutex to protect keywords map when threads try
+     *to increment in parallel */
     mutex keyword_protection;
+
+    /*for the specific line nums*/
     for(int n : line_nums) {
 
-        string current_line = text_lines[n];
-        int current_line_len = current_line.length();
+        string current_line = text_lines[n]; //grab the line
+        int current_line_len = current_line.length(); //grab its length
 
-        // for(int j = 0; j < current_line_len; j++) {
-        int i = 0; int j = 0; 
+        int i = 0; int j = 0; //establish two points for indexing
         while(i < current_line_len && j < current_line_len) {
+            /*if j is a space (end of word (or line)) or period (end of line)*/
             if(current_line.at(j) == ' ' || current_line.at(j) == '.') {
+                /*grab the current subtr */
                 string word = current_line.substr(i, j - i);
-                {
-                    if(keywords.find(word) != keywords.end()) {
+                if(keywords.find(word) != keywords.end()) {
+                    {
                         lock_guard<mutex> lock(keyword_protection);
                         keywords[word]++;
                     }
                 }
+                /*if its not a word, continue to increment*/
                 j++;
+                /*set new beginning to current end + 1*/
                 i = j;
-            } 
+            }
+            /*j always goes to next position*/
             j ++;
         }
     }
@@ -118,10 +132,10 @@ private:
     vector<thread*> threads;
     int thread_count;
 
-    void thread_task(int rank, Search &s) {
+    void thread_task(int rank, Search &s, int text_size) {
         vector<int> alloc_lines;
         //i is line number, thread_count is thread count
-        for (int line_num = 0; line_num < s.get_text_size(); line_num ++) {
+        for (int line_num = 0; line_num < text_size; line_num ++) {
             if(line_num % thread_count == rank) {
                 alloc_lines.push_back(line_num);
             }
@@ -137,8 +151,9 @@ public:
     ~Executor(){}
 
     void execute(Search &s) {
+        int text_size = s.get_text_size();
         for(int i = 0; i < thread_count; i++) {
-            threads.push_back(new thread([&, i]{ thread_task(i, s); }));
+            threads.push_back(new thread([&, i]{ thread_task(i, s, text_size); }));
         }
 
         // cout << "processing..." << endl;
