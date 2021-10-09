@@ -86,6 +86,8 @@ void process_keyword_file() {
     }
 }
 
+/*lots of printing functionality!*/
+
 void process_text_file() {
     string curr_line;
     bool end_char;
