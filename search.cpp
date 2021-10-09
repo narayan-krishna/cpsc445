@@ -19,118 +19,122 @@ struct SearchData{
  *take in a file, and a list of words to search for.*/
 class Search{
 public:
+    /*declare storage for data, a map for keyword counts,
+    *and a vector text_lines */
+    SearchData data;
+    map<string, int> keywords;
+    vector<string> text_lines;
 
-/*declare storage for data, a map for keyword counts,
- *and a vector text_lines */
-SearchData data;
-map<string, int> keywords;
-vector<string> text_lines;
 
+    /*construct a search based on input data*/
+    Search(SearchData d) {
+        data = d;
+        process_keyword_file();
+        process_text_file();
+    }
 
-/*construct a search based on input data*/
-Search(SearchData d) {
-    data = d;
-    process_keyword_file();
-    process_text_file();
-}
+    /*search the given lines for keywords. update their counts*/
+    void search_lines(vector<int> &line_nums) {
+        /*use a mutex to protect keywords map when threads try
+        *to increment in parallel */
+        mutex keyword_protection;
 
-/*search the given lines for keywords. update their counts*/
-void search_lines(vector<int> &line_nums) {
-    /*use a mutex to protect keywords map when threads try
-     *to increment in parallel */
-    mutex keyword_protection;
+        /*for the specific line nums*/
+        for(int n : line_nums) {
 
-    /*for the specific line nums*/
-    for(int n : line_nums) {
+            string current_line = text_lines[n]; //grab the line
+            int current_line_len = current_line.length(); //grab its length
 
-        string current_line = text_lines[n]; //grab the line
-        int current_line_len = current_line.length(); //grab its length
-
-        int i = 0; int j = 0; //establish two points for indexing
-        while(i < current_line_len && j < current_line_len) {
-            /*if j is a space (end of word (or line)) or period (end of line)*/
-            if(current_line.at(j) == ' ' || current_line.at(j) == '.') {
-                /*grab the current subtr */
-                string word = current_line.substr(i, j - i);
-                if(keywords.find(word) != keywords.end()) {
-                    {
-                        lock_guard<mutex> lock(keyword_protection);
-                        keywords[word]++;
+            int i = 0; int j = 0; //establish two points for indexing
+            while(i < current_line_len && j < current_line_len) {
+                /*if j is a space (end of word (or line)) or period (end of line)*/
+                if(current_line.at(j) == ' ' || current_line.at(j) == '.') {
+                    /*grab the current subtr */
+                    string word = current_line.substr(i, j - i);
+                    if(keywords.find(word) != keywords.end()) {
+                        {
+                            lock_guard<mutex> lock(keyword_protection);
+                            keywords[word]++;
+                        }
                     }
+                    /*if its not a word, continue to increment*/
+                    j++;
+                    /*set new beginning to current end + 1*/
+                    i = j;
                 }
-                /*if its not a word, continue to increment*/
-                j++;
-                /*set new beginning to current end + 1*/
-                i = j;
+                /*j always goes to next position*/
+                j ++;
             }
-            /*j always goes to next position*/
-            j ++;
         }
     }
-}
 
-int get_text_size() {
-    return text_lines.size();
-}
+    int get_text_size() {
+        return text_lines.size();
+    }
 
-void process_keyword_file() {
-    string curr_line; 
+    /*processing files to acquire relevant data*/
 
-    ifstream input_stream (data.keyword_list);
-    if(input_stream.is_open()) {
+    void process_keyword_file() {
+        string curr_line;
 
-        while(getline (input_stream, curr_line)) {
-            keywords.insert({curr_line, 0});
+        ifstream input_stream (data.keyword_list);
+        if(input_stream.is_open()) {
+
+            while(getline (input_stream, curr_line)) {
+                /*insert combo into map*/
+                keywords.insert({curr_line, 0});
+            }
+            input_stream.close();
         }
-        input_stream.close();
     }
-}
 
-/*lots of printing functionality!*/
+    void process_text_file() {
+        string curr_line;
+        bool end_char;
 
-void process_text_file() {
-    string curr_line;
-    bool end_char;
+        ifstream input_stream (data.text);
+        if(input_stream.is_open()) {
 
-    ifstream input_stream (data.text);
-    if(input_stream.is_open()) {
-
-        while(getline (input_stream, curr_line)) {
-            int end = curr_line.length() - 1;
-            end_char = curr_line.at(end) == ' ' || curr_line.at(end) == '.';
-            text_lines.push_back(curr_line + (end_char ? "" : " "));             
+            while(getline (input_stream, curr_line)) {
+                int end = curr_line.length() - 1;
+                end_char = curr_line.at(end) == ' ' || curr_line.at(end) == '.';
+                text_lines.push_back(curr_line + (end_char ? "" : " "));
+            }
+            input_stream.close();
         }
-        input_stream.close();
     }
-}
 
-void print_text() {
-    for (auto &n : text_lines) {
-        cout << n << endl;
+    /*lots of printing functionality!*/
+
+    void print_text() {
+        for (auto &n : text_lines) {
+            cout << n << endl;
+        }
     }
-}
 
-void print_keywords() {
-    for (auto &n : keywords) {
-        cout << n.first << ", " << n.second << endl;
+    void print_keywords() {
+        for (auto &n : keywords) {
+            cout << n.first << ", " << n.second << endl;
+        }
     }
-}
 
-void print_keywords_to_file() {
-    ofstream outfile;
-    outfile.open(data.output_file_name, fstream::app);
-    for (auto &n : keywords) {
-        outfile << n.first << " " << n.second << endl;
+    void print_keywords_to_file() {
+        ofstream outfile;
+        outfile.open(data.output_file_name, fstream::app);
+        for (auto &n : keywords) {
+            outfile << n.first << " " << n.second << endl;
+        }
+        outfile.close();
     }
-    outfile.close();
-}
 
-~Search(){}
+    ~Search(){}
 
 };
 
+/*class executor -- to split a search over multiple threads*/
 class Executor{
 private:
+    /*a vector of threads, and a thread count*/
     vector<thread*> threads;
     int thread_count;
 
