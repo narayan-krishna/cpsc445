@@ -19,7 +19,7 @@ The mouse saw a hippo
 The hippo saw a penguin
 The dog saw a zebra and a lion and a hippo and a lion
 EOF
-./a.out keywords.txt sometext.txt output.txt 4
+valgrind --tool=memcheck ./a.out keywords.txt sometext.txt output.txt 4
 cat output.txt
 
 rm keywords.txt sometext.txt output.txt
