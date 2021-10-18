@@ -201,7 +201,6 @@ public:
 
 
 int main(int argc, char **argv) {
-
     /*double check input*/
     if (argc != 5) {
         cout << "incorrect input count" << endl;
