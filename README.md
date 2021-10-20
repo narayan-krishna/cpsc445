@@ -1,2 +1,3 @@
-# cpsc445
-A repository of assignments made for CPSC445 - High Performance Computing
+# Assignment 03
+
+A report for assignment 3.
