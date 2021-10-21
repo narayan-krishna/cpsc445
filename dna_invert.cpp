@@ -38,8 +38,10 @@ void calculate_partition_range(int &start, int &end, const int &size,
   end = start + task_size;
 }
 
-void count_sequence(int *results, const vector<char> &sequence) {
-  for(auto curr : sequence) {
+void count_sequence(int *results, const vector<char> &sequence, 
+                    const int &start, const int &end) {
+  for(int i = start; i < end; i ++) {
+    char curr = sequence[i];
     // cout << curr << endl;
     if(curr == 'A') {
       results[0] ++;
@@ -75,48 +77,48 @@ int main (int argc, char *argv[]) {
   int p;
   vector<char> sequence;
   int sequence_length;
-  vector<char> cut;
   int results[4] = {0};
   int final_results[4] = {0};
-
-  // cout << argv[1] << endl;
-
-  read_str(sequence, "dna.txt");
-  sequence_length = sequence.size();
 
   // Initialized MPI
   check_error(MPI_Init(&argc, &argv), "unable to initialize MPI");
   check_error(MPI_Comm_size(MPI_COMM_WORLD, &p), "unable to obtain p");
   check_error(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "unable to obtain rank");
   cout << "Starting process " << rank << "/" << "p\n";
-
-  int divisible = (sequence_length % p == 0 ? 0 : (p - sequence_length % p));
-
-  // cout << (sequence_length + divisible)/p << endl; 
-  cut.resize((sequence_length + divisible)/p);
-  check_error(MPI_Scatter(&sequence[0], (sequence_length + divisible)/p, 
-              MPI_CHAR, &cut[0], (sequence_length + divisible)/p, MPI_CHAR, 0, 
+  
+  if(rank == 0) {
+    read_str(sequence, "dna.txt");
+    // print_vector(sequence); cout << endl;
+    sequence_length = sequence.size();
+  }
+  
+  //0 broadcasts n to the other processes
+  check_error(MPI_Bcast(&sequence_length, 1, MPI_INT, 0, 
               MPI_COMM_WORLD));  
 
-  // cout << "rank " << rank << ", " ; 
-  // print_vector(cut); cout << endl;
-  count_sequence(results, cut);
-  // sleep(1);
-  // cout << rank << ": " << endl;
-  // print_results_stdout(results);
+  if(rank != 0) {
+    sequence.resize(sequence_length);
+  }
+
+  check_error(MPI_Bcast(&sequence[0], sequence_length, MPI_CHAR, 0, 
+              MPI_COMM_WORLD));  
+
+  int range_start; int range_end;
+  calculate_partition_range(range_start, range_end, sequence_length, p, rank);
+
+  count_sequence(results, sequence, range_start, range_end);
 
   //barrier here
   check_error(MPI_Reduce(&results[0], &final_results[0], 4, MPI_INT, MPI_SUM, 
               0, MPI_COMM_WORLD));
-  // cout << rank << "sum: " << sum << endl;
+  //cout << rank << "sum: " << sum << endl;
   if (rank==0) {
+    // cout << range_start << ", " << range_end << endl;
     print_results_file(final_results, "output.txt");
   }
-
-  // sleep(2);
 
   check_error(MPI_Finalize());
   cout << "Ending process " << rank << "/" << "p\n";
 
   return 0;
-}  
+}
