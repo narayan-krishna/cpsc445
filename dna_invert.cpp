@@ -86,7 +86,6 @@ int main (int argc, char *argv[]) {
   vector<char> sequence;
   int sequence_length;
   vector<char> cut;
-  int results[4] = {0};
   vector<char> final_results;
 
   // cout << argv[1] << endl;
@@ -120,6 +119,7 @@ int main (int argc, char *argv[]) {
   // cout << rank << "sum: " << sum << endl;
   // sleep(1);
   if (rank==0) {
+    final_results.resize(final_results.size() - divisible);
     print_vector(final_results); 
     print_vector_file(final_results, "output.txt");
     cout << endl;
