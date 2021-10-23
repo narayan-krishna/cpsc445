@@ -83,15 +83,6 @@ void print_vector_file(const vector<char> &v, string file_name) {
 int main (int argc, char *argv[]) {
   int rank;
   int p;
-  vector<char> sequence;
-  int sequence_length;
-  vector<char> cut;
-  vector<char> final_results;
-
-  // cout << argv[1] << endl;
-
-  read_str(sequence, "dna.txt");
-  sequence_length = sequence.size();
 
   // Initialized MPI
   check_error(MPI_Init(&argc, &argv), "unable to initialize MPI");
@@ -99,9 +90,22 @@ int main (int argc, char *argv[]) {
   check_error(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "unable to obtain rank");
   cout << "Starting process " << rank << "/" << "p\n";
 
+  vector<char> sequence;
+  int sequence_length = 0;
+  vector<char> cut;
+  vector<char> final_results;
+
+  if(rank == 0) {
+    read_str(sequence, "dna.txt");
+    if (!sequence.size()) {
+      return 0;
+    }
+    sequence_length = sequence.size();
+  }
+
+  check_error(MPI_Bcast(&sequence_length, 1, MPI_INT, 0, MPI_COMM_WORLD));  
   int divisible = (sequence_length % p == 0 ? 0 : (p - sequence_length % p));
 
-  // cout << (sequence_length + divisible)/p << endl; 
   cut.resize((sequence_length + divisible)/p);
   if (rank == 0) {
     final_results.resize(sequence_length + divisible);
@@ -114,15 +118,15 @@ int main (int argc, char *argv[]) {
 
   invert_sequence(cut);
 
-  check_error(MPI_Gather(&cut[0], 3, MPI_CHAR, &final_results[0],
-              3, MPI_CHAR, 0, MPI_COMM_WORLD));
+  check_error(MPI_Gather(&cut[0], cut.size(), MPI_CHAR, &final_results[0],
+              cut.size(), MPI_CHAR, 0, MPI_COMM_WORLD));
   // cout << rank << "sum: " << sum << endl;
   // sleep(1);
   if (rank==0) {
     final_results.resize(final_results.size() - divisible);
-    print_vector(final_results); 
+    // print_vector(final_results); 
     print_vector_file(final_results, "output.txt");
-    cout << endl;
+    // cout << endl;
   }
 
   // sleep(2);
