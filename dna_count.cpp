@@ -85,6 +85,7 @@ int main (int argc, char *argv[]) {
 
   vector<char> sequence;
   int sequence_length;
+  int cut_size;
   vector<char> cut;
   int results[4] = {0};
   int final_results[4] = {0};
@@ -95,14 +96,15 @@ int main (int argc, char *argv[]) {
       return 0;
     }
     sequence_length = sequence.size();
+    int divisible = (sequence_length % p == 0 ? 0 : (p - sequence_length % p));
+    cut_size = (sequence_length + divisible)/p;
   }
 
-  check_error(MPI_Bcast(&sequence_length, 1, MPI_INT, 0, MPI_COMM_WORLD));  
-  int divisible = (sequence_length % p == 0 ? 0 : (p - sequence_length % p));
-  cut.resize((sequence_length + divisible)/p);
+  check_error(MPI_Bcast(&cut_size, 1, MPI_INT, 0, MPI_COMM_WORLD));  
+  cut.resize(cut_size);
 
-  check_error(MPI_Scatter(&sequence[0], (sequence_length + divisible)/p, 
-              MPI_CHAR, &cut[0], (sequence_length + divisible)/p, MPI_CHAR, 0, 
+  check_error(MPI_Scatter(&sequence[0], cut_size, 
+              MPI_CHAR, &cut[0], cut_size, MPI_CHAR, 0, 
               MPI_COMM_WORLD));  
 
   // sleep(1);

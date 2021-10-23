@@ -15,7 +15,7 @@ void check_error(int status, const string message="MPI error") {
   }
 }
 
-void read_str(vector<char> &str, string file_name){
+int read_str(vector<char> &str, string file_name){
     ifstream input_stream (file_name);
     char c;
     if(input_stream.is_open()){
@@ -23,6 +23,7 @@ void read_str(vector<char> &str, string file_name){
         str.push_back(c);    
     }
     input_stream.close();
+    return 0;
 }
 
 void print_vector(vector<char> &vec) {
@@ -91,35 +92,38 @@ int main (int argc, char *argv[]) {
   cout << "Starting process " << rank << "/" << "p\n";
 
   vector<char> sequence;
-  int sequence_length = 0;
+  int sequence_length;
+  int cut_size;
+  int divisible;
   vector<char> cut;
   vector<char> final_results;
 
   if(rank == 0) {
     read_str(sequence, "dna.txt");
     if (!sequence.size()) {
-      return 0;
+      cerr << "Invalid sequence length. Exiting..." << endl;
+      exit(1);
     }
     sequence_length = sequence.size();
+    int divisible = (sequence_length % p == 0 ? 0 : (p - sequence_length % p));
+    cut_size = (sequence_length + divisible)/p;
   }
 
-  check_error(MPI_Bcast(&sequence_length, 1, MPI_INT, 0, MPI_COMM_WORLD));  
-  int divisible = (sequence_length % p == 0 ? 0 : (p - sequence_length % p));
-
-  cut.resize((sequence_length + divisible)/p);
+  check_error(MPI_Bcast(&cut_size, 1, MPI_INT, 0, MPI_COMM_WORLD));  
+  cut.resize(cut_size);
   if (rank == 0) {
     final_results.resize(sequence_length + divisible);
     // cout << "final size" << final_results.size() << endl;
   }
 
-  check_error(MPI_Scatter(&sequence[0], (sequence_length + divisible)/p, 
-              MPI_CHAR, &cut[0], (sequence_length + divisible)/p, MPI_CHAR, 0, 
+  check_error(MPI_Scatter(&sequence[0], cut_size, 
+              MPI_CHAR, &cut[0], cut_size, MPI_CHAR, 0, 
               MPI_COMM_WORLD));  
 
   invert_sequence(cut);
 
-  check_error(MPI_Gather(&cut[0], cut.size(), MPI_CHAR, &final_results[0],
-              cut.size(), MPI_CHAR, 0, MPI_COMM_WORLD));
+  check_error(MPI_Gather(&cut[0], cut_size, MPI_CHAR, &final_results[0],
+              cut_size, MPI_CHAR, 0, MPI_COMM_WORLD));
   // cout << rank << "sum: " << sum << endl;
   // sleep(1);
   if (rank==0) {
