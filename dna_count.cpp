@@ -98,8 +98,9 @@ int main (int argc, char *argv[]) {
               MPI_CHAR, &cut[0], (sequence_length + divisible)/p, MPI_CHAR, 0, 
               MPI_COMM_WORLD));  
 
-  // cout << "rank " << rank << ", " ; 
-  // print_vector(cut); cout << endl;
+  sleep(1);
+  cout << "rank " << rank << ", " ; 
+  print_vector(cut); cout << endl;
   count_sequence(results, cut);
   // sleep(1);
   // cout << rank << ": " << endl;
