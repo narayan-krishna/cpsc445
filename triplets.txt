@@ -1,0 +1,28 @@
+convert a triplet to an integer
+AAA -- 1 A first? add 0
+AAT -- 2
+ATA -- 3
+ATT -- 4 
+    ..
+       16
+
+A first? add 0 
+T first? add 16
+G first? add 32
+C first? add 48
+
+A second? add 0
+T second? add 4
+G second? add 8
+C second? add 16
+
+A third? add 1
+T third? add 2
+G third? add 3
+C third? add 4
+
+
+
+
+
+

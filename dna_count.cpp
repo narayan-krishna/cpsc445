@@ -74,9 +74,6 @@ int main (int argc, char *argv[]) {
   int rank;
   int p;
 
-  // cout << argv[1] << endl;
-
-
   // Initialized MPI
   check_error(MPI_Init(&argc, &argv), "unable to initialize MPI");
   check_error(MPI_Comm_size(MPI_COMM_WORLD, &p), "unable to obtain p");
@@ -103,17 +100,10 @@ int main (int argc, char *argv[]) {
   check_error(MPI_Bcast(&cut_size, 1, MPI_INT, 0, MPI_COMM_WORLD));  
   cut.resize(cut_size);
 
-  check_error(MPI_Scatter(&sequence[0], cut_size, 
-              MPI_CHAR, &cut[0], cut_size, MPI_CHAR, 0, 
-              MPI_COMM_WORLD));  
+  check_error(MPI_Scatter(&sequence[0], cut_size, MPI_CHAR, &cut[0], cut_size, 
+                          MPI_CHAR, 0, MPI_COMM_WORLD));  
 
-  // sleep(1);
-  // cout << "rank " << rank << ", " ; 
-  // print_vector(cut); cout << endl;
   count_sequence(results, cut);
-  // sleep(1);
-  // cout << rank << ": " << endl;
-  // print_results_stdout(results);
 
   //barrier here
   check_error(MPI_Reduce(&results[0], &final_results[0], 4, MPI_INT, MPI_SUM, 

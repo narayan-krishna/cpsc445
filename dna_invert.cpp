@@ -116,9 +116,8 @@ int main (int argc, char *argv[]) {
     // cout << "final size" << final_results.size() << endl;
   }
 
-  check_error(MPI_Scatter(&sequence[0], cut_size, 
-              MPI_CHAR, &cut[0], cut_size, MPI_CHAR, 0, 
-              MPI_COMM_WORLD));  
+  check_error(MPI_Scatter(&sequence[0], cut_size, MPI_CHAR, &cut[0], cut_size, 
+                          MPI_CHAR, 0, MPI_COMM_WORLD));  
 
   invert_sequence(cut);
 
