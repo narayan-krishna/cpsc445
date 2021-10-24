@@ -322,10 +322,9 @@ int main (int argc, char *argv[]) {
   // }
 
   count_triplets(cut, counts);
-  invert_sequence(cut);
 
-  check_error(MPI_Gather(&cut[0], cut_size, MPI_CHAR, &final_results[0],
-              cut_size, MPI_CHAR, 0, MPI_COMM_WORLD));
+  // check_error(MPI_Gather(&cut[0], cut_size, MPI_CHAR, &final_results[0],
+  //             cut_size, MPI_CHAR, 0, MPI_COMM_WORLD));
   // cout << rank << "sum: " << sum << endl;
   // sleep(1);
   check_error(MPI_Reduce(&counts[0], &final_results[0], 64, MPI_INT, MPI_SUM, 
