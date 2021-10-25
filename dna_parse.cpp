@@ -153,16 +153,24 @@ int main (int argc, char *argv[]) {
     }
 
     sequence_length = sequence.size();
-    if(sequence_length % p*3 != 0) {
-      divisible = ((p*3) - (sequence_length % (p*3)));
-      cout << "divisible: " << divisible << endl;
-      sequence.resize(sequence_length + divisible);
-      sequence_length = sequence.size();
-      // cout << "no" << endl;
-    } else {
-      divisible = 0;
-      cout << "yes" << endl;
-    }
+    // if(sequence_length % p*3 != 0) {
+    //   // cout << "no" << endl;
+    // } else {
+    //   int current_cut = sequence_length/p;
+    //   if(current_cut%3 != 0) {
+    //     divisible = (current_cut - (current_cut % 3))/3;
+    //     cout << "divisible: " << divisible << endl;
+    //     // cout << "cut size maybe: " << (sequence_length + divisible)/p << endl;
+    //   } else {
+
+    //     divisible = 0;
+    //     cout << "yes" << endl;
+    //   }
+    // }
+    divisible = ((p*3) - (sequence_length % (p*3)));
+    cout << "divisible: " << divisible << endl;
+    sequence.resize(sequence_length + divisible);
+    sequence_length = sequence.size();
 
     cut_size = sequence_length/p;
   }
@@ -173,6 +181,7 @@ int main (int argc, char *argv[]) {
   check_error(MPI_Scatter(&sequence[0], cut_size, MPI_CHAR, &cut[0], cut_size, 
                           MPI_CHAR, 0, MPI_COMM_WORLD));  
 
+  cout << cut_size << endl;
   count_triplets(cut, counts);
 
   check_error(MPI_Reduce(&counts[0], &final_results[0], 64, MPI_INT, MPI_SUM, 
