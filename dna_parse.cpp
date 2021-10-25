@@ -153,20 +153,6 @@ int main (int argc, char *argv[]) {
     }
 
     sequence_length = sequence.size();
-    // if(sequence_length % p*3 != 0) {
-    //   // cout << "no" << endl;
-    // } else {
-    //   int current_cut = sequence_length/p;
-    //   if(current_cut%3 != 0) {
-    //     divisible = (current_cut - (current_cut % 3))/3;
-    //     cout << "divisible: " << divisible << endl;
-    //     // cout << "cut size maybe: " << (sequence_length + divisible)/p << endl;
-    //   } else {
-
-    //     divisible = 0;
-    //     cout << "yes" << endl;
-    //   }
-    // }
     divisible = ((p*3) - (sequence_length % (p*3)));
     cout << "divisible: " << divisible << endl;
     sequence.resize(sequence_length + divisible);
