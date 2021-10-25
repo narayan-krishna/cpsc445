@@ -259,83 +259,84 @@ void print_locs_file(const vector<int> &locs, string file_name) {
 // }
 
 int main (int argc, char *argv[]) {
-  int rank;
-  int p;
+  cout << "hello world" << endl;
+  // int rank;
+  // int p;
 
-  // Initialized MPI
-  check_error(MPI_Init(&argc, &argv), "unable to initialize MPI");
-  check_error(MPI_Comm_size(MPI_COMM_WORLD, &p), "unable to obtain p");
-  check_error(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "unable to obtain rank");
-  cout << "Starting process " << rank << "/" << "p\n";
+  // // Initialized MPI
+  // check_error(MPI_Init(&argc, &argv), "unable to initialize MPI");
+  // check_error(MPI_Comm_size(MPI_COMM_WORLD, &p), "unable to obtain p");
+  // check_error(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "unable to obtain rank");
+  // cout << "Starting process " << rank << "/" << "p\n";
 
-  vector<char> sequence;
-  int sequence_length;
-  int cut_size;
-  int divisible;
-  vector<char> cut;
-  vector<int> start_end_locs;
-  // vector<char> final_results; 
-  // int counts[64] = {0};
-  // int final_results[64] = {0};
-  // char **sequences;
-  vector<int> final_results;
+  // vector<char> sequence;
+  // int sequence_length;
+  // int cut_size;
+  // int divisible;
+  // vector<char> cut;
+  // vector<int> start_end_locs;
+  // // vector<char> final_results; 
+  // // int counts[64] = {0};
+  // // int final_results[64] = {0};
+  // // char **sequences;
+  // vector<int> final_results;
 
-  if(rank == 0) {
-    read_str(sequence, "dna.txt");
-    if (!sequence.size()) {
-      cerr << "Invalid sequence length. Exiting..." << endl;
-      exit(1);
-    }
-    sequence_length = sequence.size();
-    divisible = ((p*3) - (sequence_length % (p*3)));
-    cout << "divisible: " << divisible << endl;
-    sequence.resize(sequence_length + divisible);
-    sequence_length = sequence.size();
+  // if(rank == 0) {
+  //   read_str(sequence, "dna.txt");
+  //   if (!sequence.size()) {
+  //     cerr << "Invalid sequence length. Exiting..." << endl;
+  //     exit(1);
+  //   }
+  //   sequence_length = sequence.size();
+  //   divisible = ((p*3) - (sequence_length % (p*3)));
+  //   cout << "divisible: " << divisible << endl;
+  //   sequence.resize(sequence_length + divisible);
+  //   sequence_length = sequence.size();
 
-    cut_size = sequence_length/p;
-  }
+  //   cut_size = sequence_length/p;
+  // }
 
-  check_error(MPI_Bcast(&cut_size, 1, MPI_INT, 0, MPI_COMM_WORLD));  
-  cut.resize(cut_size);
-  start_end_locs.resize(cut_size/3);
+  // check_error(MPI_Bcast(&cut_size, 1, MPI_INT, 0, MPI_COMM_WORLD));  
+  // cut.resize(cut_size);
+  // start_end_locs.resize(cut_size/3);
 
-  check_error(MPI_Scatter(&sequence[0], cut_size, MPI_CHAR, &cut[0], cut_size, 
-                          MPI_CHAR, 0, MPI_COMM_WORLD));  
+  // check_error(MPI_Scatter(&sequence[0], cut_size, MPI_CHAR, &cut[0], cut_size, 
+  //                         MPI_CHAR, 0, MPI_COMM_WORLD));  
 
-  /*--------------------------------------------*/
-  search_starts_ends(cut, start_end_locs);
-  // count_triplets(cut, counts, start_end_locs);
-  /*--------------------------------------------*/
+  // /*--------------------------------------------*/
+  // search_starts_ends(cut, start_end_locs);
+  // // count_triplets(cut, counts, start_end_locs);
+  // /*--------------------------------------------*/
 
-  sleep(.2);
-  cout << rank << ": "; print_vector(cut); cout << endl;
-  sleep(1);
-  cout << rank << ": "; print_vector(start_end_locs); cout << endl;
-  sleep(1);
+  // // sleep(.2);
+  // // cout << rank << ": "; print_vector(cut); cout << endl;
+  // // sleep(1);
+  // // cout << rank << ": "; print_vector(start_end_locs); cout << endl;
+  // // sleep(1);
 
-  if(rank == 0) {
-    final_results.resize(start_end_locs.size() * p);
-  }
+  // if(rank == 0) {
+  //   final_results.resize(start_end_locs.size() * p);
+  // }
 
-  // check_error(MPI_Reduce(&counts[0], &final_results[0], 64, MPI_INT, MPI_SUM, 
-  //             0, MPI_COMM_WORLD));
+  // // check_error(MPI_Reduce(&counts[0], &final_results[0], 64, MPI_INT, MPI_SUM, 
+  // //             0, MPI_COMM_WORLD));
 
-  check_error(MPI_Gather(&start_end_locs[0], start_end_locs.size(), MPI_INT, &final_results[0],
-              start_end_locs.size(), MPI_INT, 0, MPI_COMM_WORLD));
+  // check_error(MPI_Gather(&start_end_locs[0], start_end_locs.size(), MPI_INT, &final_results[0],
+  //             start_end_locs.size(), MPI_INT, 0, MPI_COMM_WORLD));
 
-  if (rank==0) {
-    print_vector(final_results); cout << endl;
-    print_locs_file(final_results, "output.txt");
-    // char combo[3] = {'A','T','G'};
-    // cout << index(&combo) << endl;
-    // cout << index() << endl;
-    // cout << index() << endl;
-    // cout << index() << endl;
-    // print_triplets_file(final_results, "output.txt");
-  }
+  // if (rank==0) {
+  //   print_vector(final_results); cout << endl;
+  //   print_locs_file(final_results, "output.txt");
+  //   // char combo[3] = {'A','T','G'};
+  //   // cout << index(&combo) << endl;
+  //   // cout << index() << endl;
+  //   // cout << index() << endl;
+  //   // cout << index() << endl;
+  //   // print_triplets_file(final_results, "output.txt");
+  // }
 
-  check_error(MPI_Finalize());
-  cout << "Ending process " << rank << "/" << "p\n";
+  // check_error(MPI_Finalize());
+  // cout << "Ending process " << rank << "/" << "p\n";
 
   return 0;
 }  
