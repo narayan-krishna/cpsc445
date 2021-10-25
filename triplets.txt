@@ -21,6 +21,21 @@ T third? add 2
 G third? add 3
 C third? add 4
 
+dna genes
+
+ATCCGCTAATCATGAAGAACGTAAGGCTAAATAGTCTTACTAACGCTTCTCAAGATCGCCTGAGGTCAAGGAGTATACC
+ideal scenario -
+each sequence is enclosed within partition (no communication)
+
+non-deal scenario-
+a sequence starts with an end character
+a sequence starts with a begin character but there was a previous begin char
+
+deal with this using communication between ranks
+rank 1 has a begin sequence
+rank 2 has a begin sequence, then end sequence
+
+
 
 
 
