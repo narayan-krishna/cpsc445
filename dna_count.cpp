@@ -7,6 +7,8 @@
 
 using namespace std;
 
+/*DNA COUNT -- counts the number of As, Ts, Gs, and Cs in a sequence*/
+
 //run mpi while checking errors, take an error message
 void check_error(int status, const string message="MPI error") {
   if ( status != 0 ) {    
@@ -15,6 +17,8 @@ void check_error(int status, const string message="MPI error") {
   }
 }
 
+
+//read a string from a file into a vector
 void read_str(vector<char> &str, string file_name){
     ifstream input_stream (file_name);
     char c;
@@ -25,19 +29,14 @@ void read_str(vector<char> &str, string file_name){
     input_stream.close();
 }
 
+//print a character vector
 void print_vector(vector<char> &vec) {
   for(auto i : vec) {
     cout << i;
   }
 }
 
-void calculate_partition_range(int &start, int &end, const int &size,
-                               const int &p, const int &r) { 
-  int task_size = (size/p) + ((r < size%p) ? 1 : 0);
-  start = r*(size/p) + min(r, size%p);
-  end = start + task_size;
-}
-
+//add letter counts to a result array given a sequence
 void count_sequence(int *results, const vector<char> &sequence) {
   for(auto curr : sequence) {
     // cout << curr << endl;
@@ -53,6 +52,7 @@ void count_sequence(int *results, const vector<char> &sequence) {
   }
 }
 
+//print results array to standard output
 void print_results_stdout(const int *char_counter) {
   char chars[4] = {'A', 'T', 'G', 'C'}; 
   for(int i = 0; i < 4; i ++) {
@@ -60,6 +60,7 @@ void print_results_stdout(const int *char_counter) {
   }
 }
 
+//print results array to file 
 void print_results_file(const int *char_counter, string file_name) {
   char chars[4] = {'A', 'T', 'G', 'C'}; 
   ofstream out_file;
@@ -71,6 +72,7 @@ void print_results_file(const int *char_counter, string file_name) {
 }
 
 int main (int argc, char *argv[]) {
+  //initialize ranks and amount of processes 
   int rank;
   int p;
 
@@ -80,6 +82,7 @@ int main (int argc, char *argv[]) {
   check_error(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "unable to obtain rank");
   cout << "Starting process " << rank << "/" << "p\n";
 
+  //info necessary to perform task on separate processes
   vector<char> sequence;
   int sequence_length;
   int cut_size;
@@ -88,33 +91,44 @@ int main (int argc, char *argv[]) {
   int final_results[4] = {0};
 
   if(rank == 0) {
+    //rank 0 handles input of string
     read_str(sequence, "dna.txt");
     if (!sequence.size()) {
       return 0;
     }
+    /*depending on string size, determine how to adjust sequence vector sizing 
+      so that partitioning is even*/
+
+    //establish current length
     sequence_length = sequence.size();
+    //calculate amount that vector needs to increase to make divisible
     int divisible = (sequence_length % p == 0 ? 0 : (p - sequence_length % p));
+    //establish this as size of individual cuts or partitions per process
     cut_size = (sequence_length + divisible)/p;
   }
 
+  //broadcast cut_size so that processes can resize to hold enough data
   check_error(MPI_Bcast(&cut_size, 1, MPI_INT, 0, MPI_COMM_WORLD));  
   cut.resize(cut_size);
 
+  //scatter input string
   check_error(MPI_Scatter(&sequence[0], cut_size, MPI_CHAR, &cut[0], cut_size, 
                           MPI_CHAR, 0, MPI_COMM_WORLD));  
 
+  //count cut sequences and add to each result array
   count_sequence(results, cut);
 
-  //barrier here
+  //sum results using mpi reduce to an array final results
   check_error(MPI_Reduce(&results[0], &final_results[0], 4, MPI_INT, MPI_SUM, 
               0, MPI_COMM_WORLD));
-  // cout << rank << "sum: " << sum << endl;
+
+  //print results from rank 0
   if (rank==0) {
     print_results_file(final_results, "output.txt");
   }
 
-  // sleep(2);
 
+  //finalize and quit mpi, ending processes
   check_error(MPI_Finalize());
   cout << "Ending process " << rank << "/" << "p\n";
 

@@ -27,6 +27,10 @@ ATCCGCTAATCATGAAGAACGTAAGGCTAAATAGTCTTACTAACGCTTCTCAAGATCGCCTGAGGTCAAGGAGTATACC
 ideal scenario -
 each sequence is enclosed within partition (no communication)
 
+how is this captured?
+each process looks for beginnings and ends -- what does it return?
+
+
 non-deal scenario-
 a sequence starts with an end character
 a sequence starts with a begin character but there was a previous begin char
@@ -34,6 +38,8 @@ a sequence starts with a begin character but there was a previous begin char
 deal with this using communication between ranks
 rank 1 has a begin sequence
 rank 2 has a begin sequence, then end sequence
+
+rank 1 could notify rank 2 that it has a beginning with no end
 
 
 

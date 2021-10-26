@@ -9,6 +9,8 @@
 
 using namespace std;
 
+/*DNA GENES -- mark location of genes in a sequence*/
+
 //run mpi while checking errors, take an error message
 void check_error(int status, const string message="MPI error") {
   if ( status != 0 ) {    
@@ -17,18 +19,21 @@ void check_error(int status, const string message="MPI error") {
   }
 }
 
+//print a char vector
 void print_vector(vector<char> &vec) {
   for(auto i : vec) {
     cout << i;
   }
 }
 
+//print a string vector
 void print_vector(vector<int> &vec) {
   for(auto i : vec) {
     cout << i;
   }
 }
 
+//read a str from a file
 int read_str(vector<char> &str, string file_name){
     ifstream input_stream (file_name);
     char c;
@@ -40,44 +45,8 @@ int read_str(vector<char> &str, string file_name){
     return 0;
 }
 
-int read_str_triplets(vector<vector<char>> &container, string file_name){
-    ifstream input_stream (file_name);
-    char c;
-    if(input_stream.is_open()){
-
-      int count = 0;
-      vector<char> v;
-
-      while(input_stream.get(c)) {
-        if(count == 3) {
-          container.push_back(v);
-          v.clear();
-          count = 0;
-        }
-        v.push_back(c);
-        // print_vector(v); cout << endl;
-        count ++;
-      }
-    }
-    input_stream.close();
-    return 0;
-}
-
-void invert_sequence(vector<char> &sequence) {
-  for(int i = 0; i < sequence.size(); i ++) {
-    char curr = sequence[i];
-    if(curr == 'A') {
-      sequence[i] = 'T';
-    } else if(curr == 'T') {
-      sequence[i] = 'A';
-    } else if(curr == 'G') {
-      sequence[i] = 'C';
-    } else if(curr == 'C') {
-      sequence[i] = 'G';
-    }
-  }
-}
-
+/*maps each dna letter to a certain value so that letters and
+  triplets can be altered using ints*/
 int index(const char &letter) {
   if(letter == 'A') {
     return 0;
@@ -91,11 +60,14 @@ int index(const char &letter) {
   return -1;
 }
 
+
+//return a letter based of its index (reverse of previous function
 char reverse_index(int num) {
   char chars[4] = {'A', 'T', 'G', 'C'}; 
   return chars[num];
 }
 
+//given a the index of a certain triple (1 for triplet AAA, return the triplet
 string reverse_translate(int triplet_index) {
   string combo;
   combo += reverse_index(triplet_index/16);
@@ -109,156 +81,81 @@ string reverse_translate(int triplet_index) {
   return combo;
 }
 
+/*given a the location of a sequence and it's index, determine
+  if it could be the start or end of a gene*/
 void is_start_or_end(const int seq_loc, const int seq_index, 
                      vector<int> &start_end_locs) {
   if(seq_index == 6) {
+    //update the location vector that this a potential start
     start_end_locs[seq_loc] = 1;
   } else if(seq_index == 16 || seq_index == 18 || seq_index == 24) {
+    //update the location vector that this a potential end
     start_end_locs[seq_loc] = 2;
   }
 }
 
+//search a given vector for starts or ends
 void search_starts_ends(const vector<char> &v, vector<int> &start_end_locs) {
   // char chars[4] = {'A', 'T', 'G', 'C'}; 
   int length = v.size();
-  int loc_store = 0;
-  int skip = 0;
+  int loc_store = 0; //stores the index of a triplet
+  int skip = 0; //tracks whether triplet is somehow invalid and should be skip
+
+  //iterate by 3
   for(int i = 0; i < length; i+=3) {
 
+    //for each of the chars in a triplet
     for(int j = 0; j < 3; j ++) {
+      //if don't skip
       if(skip == 0) {
+        //calculate the index of num
         int index_num = index(v[i + j]);
         if (index_num > -1) {
+          //properly reduce it while it valid
           loc_store += index_num / pow(4, j);
         } else {
+          //if it's invalid, skip the whole triplet
           skip = 1;
         }
       }
     }
 
    if(skip == 0) {
+      //if it wasn't skipped, check if it's a start or end
+      //vector will be updated via reference
       is_start_or_end(i/3, loc_store, start_end_locs);
       // counter[loc_store]++;
     } 
 
+    //reset
     loc_store = 0;
     skip = 0;
   }
 }
 
-void count_triplets(const vector<char> &v, int *counter, vector<int> &start_end_locs) {
-  // char chars[4] = {'A', 'T', 'G', 'C'}; 
-  int length = v.size();
-  int loc_store = 0;
-  int skip = 0;
-  for(int i = 0; i < length; i+=3) {
-
-    for(int j = 0; j < 3; j ++) {
-      if(skip == 0) {
-        int index_num = index(v[i + j]);
-        if (index_num > -1) {
-          loc_store += index_num / pow(4, j);
-        } else {
-          skip = 1;
-        }
-      }
-    }
-
-   if(skip == 0) {
-      // cout << loc_store << endl;
-      counter[loc_store]++;
-    } 
-
-    loc_store = 0;
-    skip = 0;
-  }
-}
-
-
-void print_results_stdout(const int *char_counter) {
-  char chars[4] = {'A', 'T', 'G', 'C'}; 
-  for(int i = 0; i < 4; i ++) {
-    cout << chars[i] << " " << char_counter[i] << endl;
-  }
-}
-
-void print_triplets_stdout(const int *triplet_counter) {
-  map<string, int> results;
-  for(int i = 0; i < 64; i ++) {
-    if(triplet_counter[i] != 0) {
-      // cout << reverse_translate(i) << " " << triplet_counter[i] << endl;
-      results[reverse_translate(i)] = triplet_counter[i];
-    }
-  }
-
-  for(auto k : results) {
-    cout << k.first << " " << k.second << endl;
-  }
-  cout << endl;
-}
-
-void print_triplets_file(const int *triplet_counter, string file_name) {
-  map<string, int> results;
-  for(int i = 0; i < 64; i ++) {
-    if(triplet_counter[i] != 0) {
-      // cout << reverse_translate(i) << " " << triplet_counter[i] << endl;
-      results[reverse_translate(i)] = triplet_counter[i];
-    }
-  }
-
-  ofstream out_file;
-  out_file.open (file_name, fstream::app);
-  for(auto k : results) {
-    out_file << k.first << " " << k.second << endl;
-  }
-  out_file.close();
-}
-
-void print_results_file(const int *char_counter, string file_name) {
-  char chars[4] = {'A', 'T', 'G', 'C'}; 
-  ofstream out_file;
-  out_file.open (file_name, fstream::app);
-  for(int i = 0; i < 4; i ++) {
-    out_file << chars[i] << " " << char_counter[i] << endl;
-  }
-  out_file.close();
-}
-
-void print_vector_file(const vector<char> &v, string file_name) {
-  ofstream out_file;
-  out_file.open (file_name, fstream::app);
-  for(char i : v) {
-    out_file << i;
-  }
-  out_file << endl;
-  out_file.close();
-}
-
+//print locs vector to file
 void print_locs_file(const vector<int> &locs, string file_name) {
   ofstream out_file;
-  out_file.open(file_name, fstream::app);
+  out_file.open(file_name, fstream::app); //open file
 
-  bool within_sequence = false;
+  bool within_sequence = false; //if already in a sequence, ignore begins
   int locs_size = locs.size();
-  int start = -1; //int end = -1;
+  int start = -1; //var to check start;
   for(int i = 0; i < locs_size; i ++) {
-    // cout << locs[i];
-    if(locs[i] == 1 && !within_sequence) {
+    if(locs[i] == 1 && !within_sequence) { //if start + not in sequence
       start = i;
-      within_sequence = true;
+      within_sequence = true; //now in sequence
 
     } else if(locs[i] == 2 && within_sequence) {
-      out_file << start << " " << i << endl;   
-      within_sequence = false;
+      out_file << start << " " << i << endl;  //end found? print 
+      within_sequence = false; //no longer in sequence
     }
   }
   out_file.close();
 }
 
-// void delete_2d_array(char **array, int array_size) {
-// }
-
 int main (int argc, char *argv[]) {
+  //establish rank for process and total processes
   int rank;
   int p;
 
@@ -268,16 +165,13 @@ int main (int argc, char *argv[]) {
   check_error(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "unable to obtain rank");
   cout << "Starting process " << rank << "/" << "p\n";
 
+  //info necessary to perform task on separate processes
   vector<char> sequence;
   int sequence_length;
   int cut_size;
   int divisible;
   vector<char> cut;
   vector<int> start_end_locs;
-  // vector<char> final_results; 
-  // int counts[64] = {0};
-  // int final_results[64] = {0};
-  // char **sequences;
   vector<int> final_results;
 
   if(rank == 0) {
@@ -286,6 +180,9 @@ int main (int argc, char *argv[]) {
       cerr << "Invalid sequence length. Exiting..." << endl;
       exit(1);
     }
+
+    //calculate how to increase vector to make divisble
+    //divisions also have to be divisible by 3 (triplets)
     sequence_length = sequence.size();
     divisible = ((p*3) - (sequence_length % (p*3)));
     cout << "divisible: " << divisible << endl;
@@ -295,43 +192,31 @@ int main (int argc, char *argv[]) {
     cut_size = sequence_length/p;
   }
 
+  //broadcast cut_size so that processes can resize to hold enough data
   check_error(MPI_Bcast(&cut_size, 1, MPI_INT, 0, MPI_COMM_WORLD));  
   cut.resize(cut_size);
   start_end_locs.resize(cut_size/3);
 
+  //scatter input string
   check_error(MPI_Scatter(&sequence[0], cut_size, MPI_CHAR, &cut[0], cut_size, 
                           MPI_CHAR, 0, MPI_COMM_WORLD));  
 
   /*--------------------------------------------*/
   search_starts_ends(cut, start_end_locs);
-  // count_triplets(cut, counts, start_end_locs);
   /*--------------------------------------------*/
 
-  // sleep(.2);
-  // cout << rank << ": "; print_vector(cut); cout << endl;
-  // sleep(1);
-  // cout << rank << ": "; print_vector(start_end_locs); cout << endl;
-  // sleep(1);
-
+  //resize final results to fit data
   if(rank == 0) {
     final_results.resize(start_end_locs.size() * p);
   }
 
-  // check_error(MPI_Reduce(&counts[0], &final_results[0], 64, MPI_INT, MPI_SUM, 
-  //             0, MPI_COMM_WORLD));
-
+  //gather results together
   check_error(MPI_Gather(&start_end_locs[0], start_end_locs.size(), MPI_INT, &final_results[0],
               start_end_locs.size(), MPI_INT, 0, MPI_COMM_WORLD));
 
+  //print results to file
   if (rank==0) {
-    print_vector(final_results); cout << endl;
     print_locs_file(final_results, "output.txt");
-    // char combo[3] = {'A','T','G'};
-    // cout << index(&combo) << endl;
-    // cout << index() << endl;
-    // cout << index() << endl;
-    // cout << index() << endl;
-    // print_triplets_file(final_results, "output.txt");
   }
 
   check_error(MPI_Finalize());
