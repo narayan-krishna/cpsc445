@@ -9,7 +9,7 @@
 
 using namespace std;
 
-/*DNA GENES -- mark location of genes in a sequence*/
+/*DNA GENES -- counts the number of As, Ts, Gs, and Cs in a sequence*/
 
 //run mpi while checking errors, take an error message
 void check_error(int status, const string message="MPI error") {
