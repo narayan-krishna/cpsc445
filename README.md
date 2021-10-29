@@ -5,9 +5,9 @@
 The speedup of an algorithm is defined as
 <img src="https://render.githubusercontent.com/render/math?math=S_p(n) = \frac{T_1(n)}{T_p(n)}">
 
-$S_p(n) = \frac{T_1(n)}{T_p(n)}$.
+![formula](<https://render.githubusercontent.com/render/math?math=\large\f(x)=sin(x)>)
 
-<img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1">
+$S_p(n) = \frac{T_1(n)}{T_p(n)}$.
 
 ### dna_count.cpp
 
