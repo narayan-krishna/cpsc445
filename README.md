@@ -7,6 +7,8 @@ The speedup of an algorithm is defined as
 
 $S_p(n) = \frac{T_1(n)}{T_p(n)}$.
 
+<img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1">
+
 ### dna_count.cpp
 
 $T_1(n) = t_a(n)$  
