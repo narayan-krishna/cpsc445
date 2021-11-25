@@ -56,13 +56,13 @@ void read_str(vector<int> &str, string file_name){
     input_stream.close();
 }
 
-void print_vector_file(const vector<int> &v, string file_name) {
+void print_sequence_file(const int *sequence, int length, string file_name) {
   ofstream out_file;
   out_file.open (file_name, fstream::app);
 
   char chars[4] = {'A', 'T', 'G', 'C'}; 
-  for(int i : v) {
-    out_file << chars[i];
+  for(int i = 0; i < length; i ++) {
+    out_file << chars[sequence[i]];
   }
   out_file << endl;
   out_file.close();
@@ -96,10 +96,6 @@ int main() {
 
   int N = temp_sequence.size();
 
-  for(int i = 0; i < N; i ++) {
-    cout << temp_sequence[i];
-  }
-
   cout << endl;
   int *ha = new int[N];
   int *da;
@@ -108,7 +104,6 @@ int main() {
   // set problem input (b)
   for (int i = 0; i<N; ++i) {
     ha[i] = temp_sequence[i];
-    printf("%i", ha[i]);
   }
   puts("\n");
   
@@ -124,10 +119,12 @@ int main() {
   // int sum; //sum in parallel
   cudaMemcpy(ha, da, N*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
-  for (int i = 0; i<N; ++i) {
-    printf("%i", ha[i]);
-  }
-  puts("\n");
+  // for (int i = 0; i<N; ++i) {
+  //   printf("%i", ha[i]);
+  // }
+  // puts("\n");
+
+  print_sequence_file(ha, N, "output.txt");
 
   // int expected_sum = (N-1)*N*(2*N-1)/6;
   // printf("%i (should be %i)", sum, expected_sum); //print sum
