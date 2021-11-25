@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -37,19 +38,20 @@ using namespace std;
 void read_str(vector<int> &str, string file_name){
     ifstream input_stream (file_name);
     char c;
-    int translated = -1; 
+    int translated; 
     if(input_stream.is_open()){
-      while(input_stream.get(c))
-        if(c == 'A') {
+      while(input_stream.get(c)) {
+        if (c == 'A') {
           translated = 0;
-        } if(c == 'T') {
+        } else if(c == 'T') {
            translated = 1;
-        } if(c == 'G') {
+        } else if(c == 'G') {
            translated = 2;
-        } if(c == 'C') {
+        } else {
           translated = 3;
         }
         str.push_back(translated);    
+      }
     }
     input_stream.close();
 }
@@ -94,6 +96,11 @@ int main() {
 
   int N = temp_sequence.size();
 
+  for(int i = 0; i < N; i ++) {
+    cout << temp_sequence[i];
+  }
+
+  cout << endl;
   int *ha = new int[N];
   int *da;
   cudaMalloc((void **)&da, N*sizeof(int));
