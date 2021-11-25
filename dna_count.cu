@@ -41,6 +41,7 @@ void print_results_file(const int *char_counter, string file_name) {
 __global__ void count(int *da, int *dcounter, int N) {
   int tid = threadIdx.x;
   // printf("tid is: %i\n", tid);
+  printf("%i", da[tid]);
   dcounter[da[tid]] ++;
 }
 
