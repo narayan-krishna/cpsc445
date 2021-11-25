@@ -94,13 +94,13 @@ int main() {
 
   int N = temp_sequence.size();
 
-  int *ha = &temp_sequence[0];
+  int *ha = new int[N];
   int *da;
   cudaMalloc((void **)&da, N*sizeof(int));
 
   // set problem input (b)
   for (int i = 0; i<N; ++i) {
-    // ha[i] = temp_sequence[i];
+    ha[i] = temp_sequence[i];
     printf("%i", ha[i]);
   }
   puts("\n");
