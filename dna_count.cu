@@ -80,7 +80,7 @@ int main() {
   // int sum; //sum in parallel
   cudaMemcpy(hcounter, dcounter, N*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
-  print_results_file(ha, N, "output.txt");
+  print_results_file(hcounter, "output.txt");
 
   // int expected_sum = (N-1)*N*(2*N-1)/6;
   // printf("%i (should be %i)", sum, expected_sum); //print sum
