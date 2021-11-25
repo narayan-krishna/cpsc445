@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
+#include <vector>
+
+using namespace std;
 
 //blockId -> the block number
 //blockDim -> number of threads per block
@@ -30,6 +34,37 @@
 //     __syncthreads();
 //   }
 // }
+void read_str(vector<int> &str, string file_name){
+    ifstream input_stream (file_name);
+    char c;
+    int translated = -1; 
+    if(input_stream.is_open()){
+      while(input_stream.get(c))
+        if(c == 'A') {
+          translated = 0;
+        } if(c == 'T') {
+           translated = 1;
+        } if(c == 'G') {
+           translated = 2;
+        } if(c == 'C') {
+          translated = 3;
+        }
+        str.push_back(translated);    
+    }
+    input_stream.close();
+}
+
+void print_vector_file(const vector<int> &v, string file_name) {
+  ofstream out_file;
+  out_file.open (file_name, fstream::app);
+
+  char chars[4] = {'A', 'T', 'G', 'C'}; 
+  for(int i : v) {
+    out_file << chars[i];
+  }
+  out_file << endl;
+  out_file.close();
+}
 
 //the sequence da, sequence length, n
 __global__ void invert(int *da, int N) {
@@ -52,15 +87,20 @@ __global__ void invert(int *da, int N) {
 
 int main() {
   //INPUTS
-  int N = 8;
+  // int N = 8;
 
-  int *ha = new int[N];
+  vector<int> temp_sequence;
+  read_str(temp_sequence, "dna.txt");
+
+  int N = temp_sequence.size();
+
+  int *ha = &temp_sequence[0];
   int *da;
   cudaMalloc((void **)&da, N*sizeof(int));
 
   // set problem input (b)
   for (int i = 0; i<N; ++i) {
-    ha[i] = rand() % 4;
+    // ha[i] = temp_sequence[i];
     printf("%i", ha[i]);
   }
   puts("\n");
