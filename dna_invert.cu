@@ -34,7 +34,7 @@
 //the sequence da, sequence length, n
 __global__ void invert(int *da, int N) {
   int tid = threadIdx.x;
-  printf("tid is: %i", tid);
+  printf("tid is: %i\n", tid);
 
   int new_val; 
   if (da[tid] == 0) {
