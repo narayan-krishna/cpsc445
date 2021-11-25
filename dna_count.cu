@@ -78,7 +78,7 @@ int main() {
   cudaDeviceSynchronize();
 
   // int sum; //sum in parallel
-  cudaMemcpy(hcounter, dcounter, N*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
+  cudaMemcpy(hcounter, dcounter, 4*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
   print_results_file(hcounter, "output.txt");
 
