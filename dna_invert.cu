@@ -70,7 +70,7 @@ int main() {
   // int W = 16; //establish thread count
   // reduce_sum<<<1,W>>>(da, N); //call reduce sum using 1 block, 16 threads
 
-  invert<<<1,1>>>(da, N);    
+  invert<<<1,N>>>(da, N);    
 
   cudaDeviceSynchronize();
 
