@@ -95,6 +95,7 @@ __global__ void parse(int *da, int *dcounter, int N) {
   loc_store += da[offset_loc + 2] * 16;
 
   //translate the number combination into number count
+  printf("loc_store is: %i\n", loc_store);
 
   atomicAdd(&dcounter[loc_store], 1);
 }
@@ -133,8 +134,8 @@ int main() {
   // int W = 16; //establish thread count
   // reduce_sum<<<1,W>>>(da, N); //call reduce sum using 1 block, 16 threads
 
-  parse<<<1,N/3>>>(da, dcounter, N);    
-  // parse<<<1,1>>>(da, dcounter, N);    
+  // parse<<<1,N/3>>>(da, dcounter, N);    
+  parse<<<1,1>>>(da, dcounter, N);    
 
   cudaDeviceSynchronize();
 
