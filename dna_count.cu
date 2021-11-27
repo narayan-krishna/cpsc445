@@ -76,6 +76,7 @@ int main() {
   // reduce_sum<<<1,W>>>(da, N); //call reduce sum using 1 block, 16 threads
 
   count<<<1,N>>>(da, dcounter, N);    
+  //blocks, N/1
 
   cudaDeviceSynchronize();
 

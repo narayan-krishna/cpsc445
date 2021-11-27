@@ -56,13 +56,27 @@ void read_str(vector<int> &str, string file_name){
     input_stream.close();
 }
 
-void print_results_file(const int *combo_counter, string file_name) {
+string reverse_translate(int triplet_index) {
   char chars[4] = {'A', 'T', 'G', 'C'}; 
+
+  string combo;
+  combo += chars[triplet_index/16];
+  triplet_index = triplet_index % 16;
+
+  combo += chars[triplet_index/4];
+  triplet_index = triplet_index % 4;
+
+  combo += chars[triplet_index];
+
+  return combo;
+}
+  
+void print_results_file(const int *combo_counter, string file_name) {
   ofstream out_file;
   out_file.open (file_name, fstream::app);
   for(int i = 0; i < 64; i ++) {
     if (combo_counter[i] > 0) {
-      out_file << /*reverse translate i*/  << " " << combo_counter[i] << endl;
+      out_file << reverse_translate(i)  << " " << combo_counter[i] << endl;
     }
   }
   out_file.close();
@@ -70,14 +84,19 @@ void print_results_file(const int *combo_counter, string file_name) {
 
 //the sequence da, sequence length, n
 __global__ void parse(int *da, int *dcounter, int N) {
-  // int tid = threadIdx.x;
-  // printf("tid is: %i\n", tid);
-  // int loc_store = 0;
-  // if(da[tid] == 
+  int tid = threadIdx.x;
+  int offset_loc = tid*3;
+
+  printf("tid is: %i\n", tid);
+
+  int loc_store = 0;
+  loc_store += da[offset_loc] * 1;
+  loc_store += da[offset_loc + 1] * 4;
+  loc_store += da[offset_loc + 2] * 16;
 
   //translate the number combination into number count
 
-  //atomicAdd(&dcounter[/*translated number*/], 1);
+  atomicAdd(&dcounter[loc_store], 1);
 }
 
 int main() {
@@ -121,7 +140,7 @@ int main() {
   // int sum; //sum in parallel
   cudaMemcpy(hcounter, dcounter, 64*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
-  print_sequence_file(hcounter, "output.txt");
+  print_results_file(hcounter, "output.txt");
 
   // int expected_sum = (N-1)*N*(2*N-1)/6;
   // printf("%i (should be %i)", sum, expected_sum); //print sum
