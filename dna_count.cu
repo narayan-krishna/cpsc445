@@ -39,7 +39,7 @@ void print_results_file(const int *char_counter, string file_name) {
 
 //the sequence da, sequence length, n
 __global__ void count(int *da, int *dcounter, int N) {
-  int tid = threadIdx.x;
+  int tid = blockDim.x * blockIdx.x + threadIdx.x;
   // printf("tid is: %i\n", tid);
   printf("%i", da[tid]);
   // dcounter[da[tid]] = dcounter[da[tid]] + 1;
@@ -87,6 +87,10 @@ int main() {
   // int expected_sum = (N-1)*N*(2*N-1)/6;
   // printf("%i (should be %i)", sum, expected_sum); //print sum
   cudaFree(da);
+  cudaFree(dcounter);
+
   free(ha);
+  free(hcounter);
+
   return 0;
 }
