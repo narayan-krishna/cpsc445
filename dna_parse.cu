@@ -137,8 +137,8 @@ int main() {
   // int W = 16; //establish thread count
   // reduce_sum<<<1,W>>>(da, N); //call reduce sum using 1 block, 16 threads
 
-  // parse<<<1,N/3>>>(da, dcounter, N);    
-  parse<<<1,1>>>(da, dcounter, N);    
+  parse<<<1,N/3>>>(da, dcounter, N);    
+  // parse<<<1,1>>>(da, dcounter, N);    
 
   cudaDeviceSynchronize();
 
@@ -152,7 +152,7 @@ int main() {
     cout << endl;
   }
 
-  print_results_file(hcounter, "output.txt");
+  // print_results_file(hcounter, "output.txt");
 
   // int expected_sum = (N-1)*N*(2*N-1)/6;
   // printf("%i (should be %i)", sum, expected_sum); //print sum
