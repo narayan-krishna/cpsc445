@@ -72,6 +72,7 @@ string reverse_translate(int triplet_index) {
 }
   
 void print_results_file(const int *combo_counter, string file_name) {
+  cout "here" << endl;
   ofstream out_file;
   out_file.open (file_name, fstream::app);
   for(int i = 0; i < 64; i ++) {
