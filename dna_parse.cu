@@ -119,7 +119,7 @@ int main() {
   int *da, *dcounter;
 
   cudaMalloc((void **)&da, N*sizeof(int));
-  cudaMalloc((void **)&dcounter, 4*sizeof(int));
+  cudaMalloc((void **)&dcounter, 64*sizeof(int));
 
   // set problem input (b)
   for (int i = 0; i<N; ++i) {
@@ -134,6 +134,7 @@ int main() {
   // reduce_sum<<<1,W>>>(da, N); //call reduce sum using 1 block, 16 threads
 
   parse<<<1,N/3>>>(da, dcounter, N);    
+  // parse<<<1,1>>>(da, dcounter, N);    
 
   cudaDeviceSynchronize();
 
