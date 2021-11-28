@@ -93,12 +93,10 @@ __global__ void parse(int *da, int *dcounter, int N) {
   printf("tid is: %i\n", tid);
 
   int loc_store = 0;
-  loc_store += da[offset_loc] * 1;
+  loc_store += da[offset_loc] * 16;
   loc_store += da[offset_loc + 1] * 4;
-  loc_store += da[offset_loc + 2] * 16;
-  cout << da[offset_loc] << endl;
-  cout << da[offset_loc+1] << endl;
-  cout << da[offset_loc+2] << endl;
+  loc_store += da[offset_loc + 2] * 1;
+  printf("%i, %i, %i\n", da[offset_loc], da[offset_loc + 1], da[offset_loc + 2]);
 
   //translate the number combination into number count
   printf("loc_store is: %i\n", loc_store);
