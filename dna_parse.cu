@@ -157,8 +157,8 @@ int main() {
 
   // int expected_sum = (N-1)*N*(2*N-1)/6;
   // printf("%i (should be %i)", sum, expected_sum); //print sum
-  free(da);
   cudaFree(da);
+  cudaFree(dcounter);
 
   free(ha);
   free(hcounter);
