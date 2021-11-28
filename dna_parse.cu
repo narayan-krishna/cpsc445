@@ -137,8 +137,8 @@ int main() {
   // int W = 16; //establish thread count
   // reduce_sum<<<1,W>>>(da, N); //call reduce sum using 1 block, 16 threads
 
-  parse<<<1,N/3>>>(da, dcounter, N);    
-  // parse<<<1,1>>>(da, dcounter, N);    
+  // parse<<<1,N/3>>>(da, dcounter, N);    
+  parse<<<1,1>>>(da, dcounter, N);    
 
   cudaDeviceSynchronize();
 
