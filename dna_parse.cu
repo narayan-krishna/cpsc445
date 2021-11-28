@@ -146,12 +146,12 @@ int main() {
   // int sum; //sum in parallel
   cudaMemcpy(hcounter, dcounter, 64*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
-  for(int i = 0; i < 8; i ++) {
-    for(int j = 0; j < 8; j ++) {
-      cout << hcounter[i][j];
-    }
-    cout << endl;
-  }
+  // for(int i = 0; i < 8; i ++) {
+  //   for(int j = 0; j < 8; j ++) {
+  //     cout << hcounter[i][j];
+  //   }
+  //   cout << endl;
+  // }
 
   print_results_file(hcounter, "output.txt");
 
