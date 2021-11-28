@@ -138,18 +138,20 @@ int main() {
   // int W = 16; //establish thread count
   // reduce_sum<<<1,W>>>(da, N); //call reduce sum using 1 block, 16 threads
 
-  // parse<<<1,N/3>>>(da, dcounter, N);    
-  parse<<<1,1>>>(da, dcounter, N);    
+  parse<<<1,N/3>>>(da, dcounter, N);    
+  // parse<<<1,1>>>(da, dcounter, N);    
 
   cudaDeviceSynchronize();
 
   // int sum; //sum in parallel
   cudaMemcpy(hcounter, dcounter, 64*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
-  for(int i = 0; i < 64; i ++) {
-      cout << hcounter[i];
+  for(int i = 0; i < 8; i ++) {
+    for(int j = 0; j < 8; j ++) {
+      cout << hcounter[i][j];
+    }
+    cout << endl;
   }
-  cout << endl;
 
   print_results_file(hcounter, "output.txt");
 
