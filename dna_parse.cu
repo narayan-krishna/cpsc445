@@ -72,15 +72,18 @@ string reverse_translate(int triplet_index) {
 }
   
 void print_results_file(const int *combo_counter, string file_name) {
-  cout << "here" << endl;
+  map<string, int> results;
+  for(int i = 0; i < 64; i ++) {
+    if(combo_counter[i] != 0) {
+      // cout << reverse_translate(i) << " " << triplet_counter[i] << endl;
+      results[reverse_translate(i)] = combo_counter[i];
+    }
+  }
+
   ofstream out_file;
   out_file.open (file_name, fstream::app);
-  for(int i = 0; i < 64; i ++) {
-    // cout << combo_counter[i] << endl;
-    if (combo_counter[i] > 0) {
-      out_file << reverse_translate(i)  << " " << combo_counter[i] << endl;
-      // out_file << "found" << endl;
-    }
+  for(auto k : results) {
+    out_file << k.first << " " << k.second << endl;
   }
   out_file.close();
 }
