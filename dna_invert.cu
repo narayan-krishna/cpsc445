@@ -15,26 +15,6 @@ using namespace std;
 
 //random change
 
-// __global__ void reduce_sum(int * da, int N) {
-//     //array a [1,2,3,...,10,11,12]
-//   int W = blockDim.x; 
-//   int tid = threadIdx.x;
-//   for(int i=tid+W; i<N; i+=W) da[tid]+=da[i];
-//   __syncthreads();
-
-// //__shared__ int tmp[1024];
-// //   tmp[gid] = da[gid];
-
-
-//   for(int delta=1; delta<W; delta*=2) { //set to 1, then set to 2 (w is 4 and
-//     int i = tid*2*delta;                // delta doubles over loop
-//     if (i + delta < N) {
-//       da[i] += da[i+delta];
-//       printf("%i (%i): %i\n", i, delta, da[i]);
-//     }
-//     __syncthreads();
-//   }
-// }
 void read_str(vector<int> &str, string file_name){
     ifstream input_stream (file_name);
     char c;
@@ -101,7 +81,6 @@ int main() {
   int *da;
   cudaMalloc((void **)&da, N*sizeof(int));
 
-  // set problem input (b)
   for (int i = 0; i<N; ++i) {
     ha[i] = temp_sequence[i];
   }
@@ -109,20 +88,14 @@ int main() {
   
   cudaMemcpy(da, ha, N*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
 
-  // int W = 16; //establish thread count
-  // reduce_sum<<<1,W>>>(da, N); //call reduce sum using 1 block, 16 threads
-
   invert<<<1,N>>>(da, N);    
 
   cudaDeviceSynchronize();
 
-  // int sum; //sum in parallel
   cudaMemcpy(ha, da, N*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
   print_sequence_file(ha, N, "output.txt");
 
-  // int expected_sum = (N-1)*N*(2*N-1)/6;
-  // printf("%i (should be %i)", sum, expected_sum); //print sum
   cudaFree(da);
   free(ha);
   return 0;
