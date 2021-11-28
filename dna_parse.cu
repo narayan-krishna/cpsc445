@@ -76,10 +76,10 @@ void print_results_file(const int *combo_counter, string file_name) {
   ofstream out_file;
   out_file.open (file_name, fstream::app);
   for(int i = 0; i < 64; i ++) {
-    cout << combo_counter[i] << endl;
+    // cout << combo_counter[i] << endl;
     if (combo_counter[i] > 0) {
-      // out_file << reverse_translate(i)  << " " << combo_counter[i] << endl;
-      out_file << "found" << endl;
+      out_file << reverse_translate(i)  << " " << combo_counter[i] << endl;
+      // out_file << "found" << endl;
     }
   }
   out_file.close();
@@ -101,7 +101,7 @@ __global__ void parse(int *da, int *dcounter, int N) {
   //translate the number combination into number count
   printf("loc_store is: %i\n", loc_store);
 
-  atomicAdd(&dcounter[4], 1);
+  atomicAdd(&dcounter[loc_store], 1);
 }
 
 int main() {
@@ -151,7 +151,7 @@ int main() {
   }
   cout << endl;
 
-  // print_results_file(hcounter, "output.txt");
+  print_results_file(hcounter, "output.txt");
 
   // int expected_sum = (N-1)*N*(2*N-1)/6;
   // printf("%i (should be %i)", sum, expected_sum); //print sum
