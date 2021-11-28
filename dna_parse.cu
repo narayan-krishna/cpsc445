@@ -101,7 +101,7 @@ __global__ void parse(int *da, int *dcounter, int N) {
   //translate the number combination into number count
   printf("loc_store is: %i\n", loc_store);
 
-  atomicAdd(&dcounter[loc_store], 1);
+  atomicAdd(&dcounter[4], 1);
 }
 
 int main() {
