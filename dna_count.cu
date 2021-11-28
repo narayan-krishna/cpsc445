@@ -47,8 +47,6 @@ __global__ void count(int *da, int *dcounter, int N) {
 }
 
 int main() {
-  //INPUTS
-  // int N = 8;
 
   vector<int> temp_sequence;
   read_str(temp_sequence, "dna.txt");
@@ -63,7 +61,6 @@ int main() {
   cudaMalloc((void **)&da, N*sizeof(int));
   cudaMalloc((void **)&dcounter, 4*sizeof(int));
 
-  // set problem input (b)
   for (int i = 0; i<N; ++i) {
     ha[i] = temp_sequence[i];
   }
@@ -72,21 +69,14 @@ int main() {
   cudaMemcpy(da, ha, N*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
   cudaMemcpy(dcounter, hcounter, 4*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
 
-  // int W = 16; //establish thread count
-  // reduce_sum<<<1,W>>>(da, N); //call reduce sum using 1 block, 16 threads
-
   count<<<1,N>>>(da, dcounter, N);    
-  //blocks, N/1
 
   cudaDeviceSynchronize();
 
-  // int sum; //sum in parallel
   cudaMemcpy(hcounter, dcounter, 4*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
   print_results_file(hcounter, "output.txt");
 
-  // int expected_sum = (N-1)*N*(2*N-1)/6;
-  // printf("%i (should be %i)", sum, expected_sum); //print sum
   cudaFree(da);
   cudaFree(dcounter);
 
