@@ -91,6 +91,7 @@ int main() {
 
   print_results_file(hcounter, "output.txt");
 
+  //free allocated memory
   cudaFree(da);
   cudaFree(dcounter);
 

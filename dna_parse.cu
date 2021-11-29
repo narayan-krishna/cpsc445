@@ -99,7 +99,6 @@ int main() {
   cudaMalloc((void **)&da, N*sizeof(int));
   cudaMalloc((void **)&dcounter, 64*sizeof(int));
 
-  // set problem input (b)
   for (int i = 0; i<N; ++i) {
     ha[i] = temp_sequence[i];
   }
