@@ -6,7 +6,6 @@
 
 using namespace std;
 
-//read string from file into a vector -> translate chars to ints
 void read_str(vector<int> &str, string file_name){
     ifstream input_stream (file_name);
     char c;
@@ -28,7 +27,6 @@ void read_str(vector<int> &str, string file_name){
     input_stream.close();
 }
 
-//print counts to file
 void print_results_file(const int *char_counter, string file_name) {
   char chars[4] = {'A', 'T', 'G', 'C'}; 
   ofstream out_file;
@@ -39,9 +37,7 @@ void print_results_file(const int *char_counter, string file_name) {
   out_file.close();
 }
 
-//each thread checks corresponding element, and
-//adds to the counter (atomicAdd) depending on what
-//it is
+//the sequence da, sequence length, n
 __global__ void count(int *da, int *dcounter, int N) {
   int tid = blockDim.x * blockIdx.x + threadIdx.x;
   // printf("tid is: %i\n", tid);
@@ -52,41 +48,31 @@ __global__ void count(int *da, int *dcounter, int N) {
 
 int main() {
 
-  //read into vector so for dynamic length + size checking
   vector<int> temp_sequence;
   read_str(temp_sequence, "dna.txt");
 
-  //get the size
   int N = temp_sequence.size();
 
   cout << endl;
-  //create host sequence array, device array
   int *ha = new int[N];
-  //this is only 4 ints, one for each type of char
   int *hcounter = new int[4]{0};
 
-  //allocate in device memory
   int *da, *dcounter;
   cudaMalloc((void **)&da, N*sizeof(int));
   cudaMalloc((void **)&dcounter, 4*sizeof(int));
 
-  //copy the sequence from the vector into host array
   for (int i = 0; i<N; ++i) {
     ha[i] = temp_sequence[i];
   }
   puts("\n");
   
-  //copy ha into da
   cudaMemcpy(da, ha, N*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
-  //copy counter into device counter
   cudaMemcpy(dcounter, hcounter, 4*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
 
-  //call kernel function
   count<<<1,N>>>(da, dcounter, N);    
 
   cudaDeviceSynchronize();
 
-  //copy device counter back into host counter
   cudaMemcpy(hcounter, dcounter, 4*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
   print_results_file(hcounter, "output.txt");
