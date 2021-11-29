@@ -7,6 +7,7 @@
 
 using namespace std;
 
+//read sequence string into vector from file
 void read_str(vector<int> &str, string file_name){
     ifstream input_stream (file_name);
     char c;
@@ -28,6 +29,8 @@ void read_str(vector<int> &str, string file_name){
     input_stream.close();
 }
 
+//reverse translate a triplet index into it's corresponding index
+//using base 4 math 
 string reverse_translate(int triplet_index) {
   char chars[4] = {'A', 'T', 'G', 'C'}; 
 
@@ -43,6 +46,7 @@ string reverse_translate(int triplet_index) {
   return combo;
 }
   
+//order all results in a map and then print them out
 void print_results_file(const int *combo_counter, string file_name) {
   map<string, int> results;
   for(int i = 0; i < 64; i ++) {
@@ -61,12 +65,14 @@ void print_results_file(const int *combo_counter, string file_name) {
 }
 
 //the sequence da, sequence length, n
+//parse the sequence for triplets, count them
 __global__ void parse(int *da, int *dcounter, int N) {
   int tid = threadIdx.x;
   int offset_loc = tid*3;
 
   printf("tid is: %i\n", tid);
 
+  //calculate index of triplet from 0 to 63, add it to the counter
   int loc_store = 0;
   loc_store += da[offset_loc] * 16;
   loc_store += da[offset_loc + 1] * 4;
@@ -81,40 +87,54 @@ __global__ void parse(int *da, int *dcounter, int N) {
 
 int main() {
 
+  //vector the acquire sequence from dna.txt
   vector<int> temp_sequence;
   read_str(temp_sequence, "dna.txt");
 
+  //ensure that sequence length is divisible by 3 so that triplets can be counted
+
+  //get the size of the sequence
   int N = temp_sequence.size();
   cout << N << endl;
-  int divisible = N % 3;
+  int divisible = N % 3; //if its divisible then this should be 0
   cout << "num elements to be added: " << 3 - divisible << endl;
+  //otherwise, compensate using calculation
   if (divisible != 0) { temp_sequence.resize(N + (3 - divisible)); }
+  //reacquire size for future partitioning purposes
   N = temp_sequence.size();
   cout << N << endl;
 
-  int *ha = new int[N];
-  int *hcounter = new int[64]{0};
-  int *da, *dcounter;
+  //allocate arrays
+  int *ha = new int[N]; //host array for sequence
+  int *hcounter = new int[64]{0}; //host counter for all 64 variations of
+                                  //triplets
+  int *da, *dcounter; //declare device array, device counter
 
-  cudaMalloc((void **)&da, N*sizeof(int));
-  cudaMalloc((void **)&dcounter, 64*sizeof(int));
+  cudaMalloc((void **)&da, N*sizeof(int)); //allocate to gpu memory
+  cudaMalloc((void **)&dcounter, 64*sizeof(int)); //allocate to gpu memory
 
+  //copy vector into host array
   for (int i = 0; i<N; ++i) {
     ha[i] = temp_sequence[i];
   }
   puts("\n");
   
+  //copy host array into device array, copy host counter into device counter
   cudaMemcpy(da, ha, N*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
   cudaMemcpy(dcounter, hcounter, 64*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
 
+  //call kernel function
   parse<<<1,N/3>>>(da, dcounter, N);    
 
   cudaDeviceSynchronize();
 
+  //copy device counter back into host counter
   cudaMemcpy(hcounter, dcounter, 64*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
+  //print the results back to file
   print_results_file(hcounter, "output.txt");
 
+  //free allocated memory
   cudaFree(da);
   cudaFree(dcounter);
 
