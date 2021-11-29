@@ -89,7 +89,7 @@ using namespace std;
 
 int main() {
 
-  cout << "hi" << endl;
+  // cout << "hi" << endl;
 
   // vector<int> temp_sequence;
   // read_str(temp_sequence, "dna.txt");
