@@ -66,29 +66,29 @@ void print_locs_file(const int *locs, int size, string file_name) {
 
 //the sequence da, sequence length, n
 __global__ void locate(int *da, int *dlocs, int n) {
-  // int tid = threadidx.x;
-  // int offset_loc = tid*3;
+  int tid = threadidx.x;
+  int offset_loc = tid*3;
 
-  // printf("tid is: %i\n", tid);
+  printf("tid is: %i\n", tid);
 
-  // int seq_index = 0;
-  // seq_index += da[offset_loc] * 16;
-  // seq_index += da[offset_loc + 1] * 4;
-  // seq_index += da[offset_loc + 2] * 1;
-  // printf("%i, %i, %i\n", da[offset_loc], da[offset_loc + 1], da[offset_loc + 2]);
+  int seq_index = 0;
+  seq_index += da[offset_loc] * 16;
+  seq_index += da[offset_loc + 1] * 4;
+  seq_index += da[offset_loc + 2] * 1;
+  printf("%i, %i, %i\n", da[offset_loc], da[offset_loc + 1], da[offset_loc + 2]);
 
-  // if(seq_index == 6) {
-  //   //update the location vector that this a potential start
-  //   dlocs[tid] = 1; 
-  // } else if(seq_index == 16 || seq_index == 18 || seq_index == 24) {
-  //   //update the location vector that this a potential end
-  //   dlocs[tid] = 2;
-  // }
+  if(seq_index == 6) {
+    //update the location vector that this a potential start
+    dlocs[tid] = 1; 
+  } else if(seq_index == 16 || seq_index == 18 || seq_index == 24) {
+    //update the location vector that this a potential end
+    dlocs[tid] = 2;
+  }
 
-  //translate the number combination into number count
-  // printf("loc_store is: %i\n", loc_store);
+  translate the number combination into number count
+  printf("loc_store is: %i\n", loc_store);
 
-  // atomicadd(&dlocs[seq_index], 1);
+  atomicadd(&dlocs[seq_index], 1);
 }
 
 int main() {
@@ -111,7 +111,7 @@ int main() {
   int *da, *dlocs; 
 
   cudaMalloc((void **)&da, N*sizeof(int));
-  cudaMalloc((void **)&dlocs, N/3*sizeof(int));
+  cudaMalloc((void **)&dlocs, (N/3)*sizeof(int));
 
   // set problem input (b)
   for (int i = 0; i<N; ++i) {
@@ -122,9 +122,9 @@ int main() {
   cudaMemcpy(da, ha, N*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
   cudaMemcpy(dlocs, hlocs, N/3*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
 
-  locate<<<1,N/3>>>(da, dlocs, N);    
+  // locate<<<1,N/3>>>(da, dlocs, N);    
 
-  cudaDeviceSynchronize();
+  // cudaDeviceSynchronize();
 
   cudaMemcpy(hlocs, dlocs, N/3*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
