@@ -15,6 +15,7 @@ using namespace std;
 
 //random change
 
+//read string from file into a vector -> translate chars to ints
 void read_str(vector<int> &str, string file_name){
     ifstream input_stream (file_name);
     char c;
@@ -36,6 +37,7 @@ void read_str(vector<int> &str, string file_name){
     input_stream.close();
 }
 
+//print a sequence of characters to a file
 void print_sequence_file(const int *sequence, int length, string file_name) {
   ofstream out_file;
   out_file.open (file_name, fstream::app);
@@ -48,7 +50,7 @@ void print_sequence_file(const int *sequence, int length, string file_name) {
   out_file.close();
 }
 
-//the sequence da, sequence length, n
+//invert a sequence, allocate on thread to each element of sequence
 __global__ void invert(int *da, int N) {
   int tid = threadIdx.x;
   printf("tid is: %i\n", tid);
@@ -71,16 +73,22 @@ int main() {
   //INPUTS
   // int N = 8;
 
+  //read into vector so for dynamic length + size checking
   vector<int> temp_sequence;
   read_str(temp_sequence, "dna.txt");
 
+  //get the sizse
   int N = temp_sequence.size();
 
   cout << endl;
+  //create host sequence array, device array
   int *ha = new int[N];
   int *da;
+
+  //allocate device array using cuda malloc
   cudaMalloc((void **)&da, N*sizeof(int));
 
+  
   for (int i = 0; i<N; ++i) {
     ha[i] = temp_sequence[i];
   }

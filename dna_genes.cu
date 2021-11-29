@@ -66,7 +66,7 @@ void print_locs_file(const int *locs, int size, string file_name) {
 
 //the sequence da, sequence length, n
 __global__ void locate(int *da, int *dlocs, int n) {
-  int tid = threadidx.x;
+  int tid = threadIdx.x;
   int offset_loc = tid*3;
 
   printf("tid is: %i\n", tid);
@@ -84,11 +84,7 @@ __global__ void locate(int *da, int *dlocs, int n) {
     //update the location vector that this a potential end
     dlocs[tid] = 2;
   }
-
-  translate the number combination into number count
-  printf("loc_store is: %i\n", loc_store);
-
-  atomicadd(&dlocs[seq_index], 1);
+  //translate the number combination into number count
 }
 
 int main() {
