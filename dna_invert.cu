@@ -77,7 +77,7 @@ int main() {
   vector<int> temp_sequence;
   read_str(temp_sequence, "dna.txt");
 
-  //get the sizse
+  //get the size
   int N = temp_sequence.size();
 
   cout << endl;
@@ -88,7 +88,7 @@ int main() {
   //allocate device array using cuda malloc
   cudaMalloc((void **)&da, N*sizeof(int));
 
-  
+
   for (int i = 0; i<N; ++i) {
     ha[i] = temp_sequence[i];
   }

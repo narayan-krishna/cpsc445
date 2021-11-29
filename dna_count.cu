@@ -52,15 +52,20 @@ __global__ void count(int *da, int *dcounter, int N) {
 
 int main() {
 
+  //read into vector so for dynamic length + size checking
   vector<int> temp_sequence;
   read_str(temp_sequence, "dna.txt");
 
+  //get the size
   int N = temp_sequence.size();
 
   cout << endl;
+  //create host sequence array, device array
   int *ha = new int[N];
+  //this is only 4 ints, one for each type of char
   int *hcounter = new int[4]{0};
 
+  //allocate in device memory
   int *da, *dcounter;
   cudaMalloc((void **)&da, N*sizeof(int));
   cudaMalloc((void **)&dcounter, 4*sizeof(int));

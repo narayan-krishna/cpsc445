@@ -91,16 +91,16 @@ int main() {
 
   cout << "hi" << endl;
 
-  vector<int> temp_sequence;
-  read_str(temp_sequence, "dna.txt");
+  // vector<int> temp_sequence;
+  // read_str(temp_sequence, "dna.txt");
 
-  int N = temp_sequence.size();
-  cout << N << endl;
-  int divisible = N % 3;
-  cout << "num elements to be added: " << 3 - divisible << endl;
-  if (divisible != 0) { temp_sequence.resize(N + (3 - divisible)); }
-  N = temp_sequence.size();
-  cout << N << endl;
+  // int N = temp_sequence.size();
+  // cout << N << endl;
+  // int divisible = N % 3;
+  // cout << "num elements to be added: " << 3 - divisible << endl;
+  // if (divisible != 0) { temp_sequence.resize(N + (3 - divisible)); }
+  // N = temp_sequence.size();
+  // cout << N << endl;
 
   // int *ha = new int[N]; //the array
   // int *hlocs = new int[N/3]{0}; //the location store for every third
