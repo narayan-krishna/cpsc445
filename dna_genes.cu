@@ -102,40 +102,40 @@ int main() {
   N = temp_sequence.size();
   cout << N << endl;
 
-  int *ha = new int[N]; //the array
-  int *hlocs = new int[N/3]{0}; //the location store for every third
-  int *da, *dlocs; 
+  // int *ha = new int[N]; //the array
+  // int *hlocs = new int[N/3]{0}; //the location store for every third
+  // int *da, *dlocs; 
 
-  cudaMalloc((void **)&da, N*sizeof(int));
-  cudaMalloc((void **)&dlocs, (N/3)*sizeof(int));
+  // cudaMalloc((void **)&da, N*sizeof(int));
+  // cudaMalloc((void **)&dlocs, (N/3)*sizeof(int));
 
-  // set problem input (b)
-  for (int i = 0; i<N; ++i) {
-    ha[i] = temp_sequence[i];
-  }
-  puts("\n");
+  // // set problem input (b)
+  // for (int i = 0; i<N; ++i) {
+  //   ha[i] = temp_sequence[i];
+  // }
+  // puts("\n");
   
-  cudaMemcpy(da, ha, N*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
-  cudaMemcpy(dlocs, hlocs, N/3*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
+  // cudaMemcpy(da, ha, N*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
+  // cudaMemcpy(dlocs, hlocs, N/3*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
 
   // locate<<<1,N/3>>>(da, dlocs, N);    
 
   // cudaDeviceSynchronize();
 
-  cudaMemcpy(hlocs, dlocs, N/3*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
+  // cudaMemcpy(hlocs, dlocs, N/3*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
-  for(int i = 0; i < N/3; i ++) {
-    cout << hlocs[i];
-  }
-  cout << endl;
+  // for(int i = 0; i < N/3; i ++) {
+  //   cout << hlocs[i];
+  // }
+  // cout << endl;
 
-  print_locs_file(hlocs, N/3, "output.txt");
+  // print_locs_file(hlocs, N/3, "output.txt");
 
-  cudaFree(da);
-  cudaFree(dlocs);
+  // cudaFree(da);
+  // cudaFree(dlocs);
 
-  free(ha);
-  free(hlocs);
+  // free(ha);
+  // free(hlocs);
 
   return 0;
 }

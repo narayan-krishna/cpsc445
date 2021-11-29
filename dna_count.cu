@@ -6,6 +6,7 @@
 
 using namespace std;
 
+//read string from file into a vector -> translate chars to ints
 void read_str(vector<int> &str, string file_name){
     ifstream input_stream (file_name);
     char c;
@@ -27,6 +28,7 @@ void read_str(vector<int> &str, string file_name){
     input_stream.close();
 }
 
+//print counts to file
 void print_results_file(const int *char_counter, string file_name) {
   char chars[4] = {'A', 'T', 'G', 'C'}; 
   ofstream out_file;
@@ -37,7 +39,9 @@ void print_results_file(const int *char_counter, string file_name) {
   out_file.close();
 }
 
-//the sequence da, sequence length, n
+//each thread checks corresponding element, and
+//adds to the counter (atomicAdd) depending on what
+//it is
 __global__ void count(int *da, int *dcounter, int N) {
   int tid = blockDim.x * blockIdx.x + threadIdx.x;
   // printf("tid is: %i\n", tid);
