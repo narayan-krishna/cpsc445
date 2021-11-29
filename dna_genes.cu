@@ -7,85 +7,85 @@
 
 using namespace std;
 
-void read_str(vector<int> &str, string file_name){
-    ifstream input_stream (file_name);
-    char c;
-    int translated; 
-    if(input_stream.is_open()){
-      while(input_stream.get(c)) {
-        if (c == 'a') {
-          translated = 0;
-        } else if(c == 't') {
-           translated = 1;
-        } else if(c == 'g') {
-           translated = 2;
-        } else {
-          translated = 3;
-        }
-        str.push_back(translated);    
-      }
-    }
-    input_stream.close();
-}
+// void read_str(vector<int> &str, string file_name){
+//     ifstream input_stream (file_name);
+//     char c;
+//     int translated; 
+//     if(input_stream.is_open()){
+//       while(input_stream.get(c)) {
+//         if (c == 'a') {
+//           translated = 0;
+//         } else if(c == 't') {
+//            translated = 1;
+//         } else if(c == 'g') {
+//            translated = 2;
+//         } else {
+//           translated = 3;
+//         }
+//         str.push_back(translated);    
+//       }
+//     }
+//     input_stream.close();
+// }
 
-string reverse_translate(int triplet_index) {
-  char chars[4] = {'a', 't', 'g', 'c'}; 
+// string reverse_translate(int triplet_index) {
+//   char chars[4] = {'a', 't', 'g', 'c'}; 
 
-  string combo;
-  combo += chars[triplet_index/16];
-  triplet_index = triplet_index % 16;
+//   string combo;
+//   combo += chars[triplet_index/16];
+//   triplet_index = triplet_index % 16;
 
-  combo += chars[triplet_index/4];
-  triplet_index = triplet_index % 4;
+//   combo += chars[triplet_index/4];
+//   triplet_index = triplet_index % 4;
 
-  combo += chars[triplet_index];
+//   combo += chars[triplet_index];
 
-  return combo;
-}
+//   return combo;
+// }
   
 
-void print_locs_file(const int *locs, int size, string file_name) {
-  ofstream out_file;
-  out_file.open(file_name, fstream::app); //open file
+// void print_locs_file(const int *locs, int size, string file_name) {
+//   ofstream out_file;
+//   out_file.open(file_name, fstream::app); //open file
 
-  bool within_sequence = false; //if already in a sequence, ignore begins
-  int start = -1; //var to check start;
-  for(int i = 0; i < size; i ++) {
-    if(locs[i] == 1 && !within_sequence) { //if start + not in sequence
-      start = i;
-      within_sequence = true; //now in sequence
+//   bool within_sequence = false; //if already in a sequence, ignore begins
+//   int start = -1; //var to check start;
+//   for(int i = 0; i < size; i ++) {
+//     if(locs[i] == 1 && !within_sequence) { //if start + not in sequence
+//       start = i;
+//       within_sequence = true; //now in sequence
 
-    } else if(locs[i] == 2 && within_sequence) {
-      out_file << start << " " << i << endl;  //end found? print 
-      within_sequence = false; //no longer in sequence
-    }
-  }
-  out_file.close();
-}
+//     } else if(locs[i] == 2 && within_sequence) {
+//       out_file << start << " " << i << endl;  //end found? print 
+//       within_sequence = false; //no longer in sequence
+//     }
+//   }
+//   out_file.close();
+// }
 
 
-//the sequence da, sequence length, n
-__global__ void locate(int *da, int *dlocs, int n) {
-  int tid = threadIdx.x;
-  int offset_loc = tid*3;
+// //the sequence da, sequence length, n
+// __global__ void locate(int *da, int *dlocs, int n) {
+//   int tid = threadIdx.x;
+//   int offset_loc = tid*3;
 
-  printf("tid is: %i\n", tid);
+//   printf("tid is: %i\n", tid);
 
-  int seq_index = 0;
-  seq_index += da[offset_loc] * 16;
-  seq_index += da[offset_loc + 1] * 4;
-  seq_index += da[offset_loc + 2] * 1;
-  printf("%i, %i, %i\n", da[offset_loc], da[offset_loc + 1], da[offset_loc + 2]);
+//   int seq_index = 0;
+//   seq_index += da[offset_loc] * 16;
+//   seq_index += da[offset_loc + 1] * 4;
+//   seq_index += da[offset_loc + 2] * 1;
+//   printf("%i, %i, %i\n", da[offset_loc], da[offset_loc + 1], da[offset_loc + 2]);
 
-  if(seq_index == 6) {
-    //update the location vector that this a potential start
-    dlocs[tid] = 1; 
-  } else if(seq_index == 16 || seq_index == 18 || seq_index == 24) {
-    //update the location vector that this a potential end
-    dlocs[tid] = 2;
-  }
-  //translate the number combination into number count
-}
+//   if(seq_index == 6) {
+//     //update the location vector that this a potential start
+//     dlocs[tid] = 1; 
+//   } else if(seq_index == 16 || seq_index == 18 || seq_index == 24) {
+//     //update the location vector that this a potential end
+//     dlocs[tid] = 2;
+//   }
+//   //translate the number combination into number count
+// }
 
 int main() {
 

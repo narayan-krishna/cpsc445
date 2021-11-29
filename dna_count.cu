@@ -70,18 +70,23 @@ int main() {
   cudaMalloc((void **)&da, N*sizeof(int));
   cudaMalloc((void **)&dcounter, 4*sizeof(int));
 
+  //copy the sequence from the vector into host array
   for (int i = 0; i<N; ++i) {
     ha[i] = temp_sequence[i];
   }
   puts("\n");
   
+  //copy ha into da
   cudaMemcpy(da, ha, N*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
+  //copy counter into device counter
   cudaMemcpy(dcounter, hcounter, 4*sizeof(int), cudaMemcpyHostToDevice); //copy ints from ha into da
 
+  //call kernel function
   count<<<1,N>>>(da, dcounter, N);    
 
   cudaDeviceSynchronize();
 
+  //copy device counter back into host counter
   cudaMemcpy(hcounter, dcounter, 4*sizeof(int), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
   print_results_file(hcounter, "output.txt");
