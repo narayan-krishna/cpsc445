@@ -93,6 +93,8 @@ __global__ void locate(int *da, int *dlocs, int n) {
 
 int main() {
 
+  cout << "hi" << endl;
+
   vector<int> temp_sequence;
   read_str(temp_sequence, "dna.txt");
 
