@@ -34,7 +34,6 @@ void print_to_csv(const float *sequence, int length, string output_file) {
 
   for(int i = 0; i < length; i ++) {
     out_file << sequence[i] << endl;
-    out_file << i << endl;
   }
 
   out_file.close();
