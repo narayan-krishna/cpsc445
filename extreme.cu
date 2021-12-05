@@ -9,7 +9,7 @@
 using namespace std;
 
 //read string from file into a vector -> translate chars to ints
-void read_csv(vector<float> &values, const string &path){
+void read_csv(vector<float> &values, const string &path, int &new_line_loc){
     ifstream input_stream (path);
 
     if (!input_stream.is_open()) {
@@ -79,7 +79,7 @@ int main() {
     ha[i] = inputs[i];
   }
 
-  for(int i = 0; i < 10; i ++) {
+  for(int i = 0; i < 20; i ++) {
     cout << inputs[i] << ", ";
   }
   cout << "..." << endl; cout << endl;
