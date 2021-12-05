@@ -46,7 +46,7 @@ void sqrt(float *da) {
   int tid = threadIdx.x;
   printf("tid is: %i\n", tid);
 
-  da[tid] = sqrt((float) da[tid]);
+  da[tid] = sqrt(da[tid]);
 }
 
 int main() {
@@ -79,5 +79,4 @@ int main() {
   cudaFree(da);
   free(ha);
   return 0;
-
 }
