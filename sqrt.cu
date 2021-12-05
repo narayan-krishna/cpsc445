@@ -41,11 +41,12 @@ void print_to_csv(const float *sequence, int length, string output_file) {
   out_file.close();
 }
 
-__global__ void sqrt(float *da) {
+__global__ 
+void sqrt(float *da) {
   int tid = threadIdx.x;
   printf("tid is: %i\n", tid);
 
-  da[tid] = sqrt(da[tid]);
+  // da[tid] = sqrt((float) da[tid]);
 }
 
 int main() {
