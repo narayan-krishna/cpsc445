@@ -20,6 +20,7 @@ void read_csv(vector<float> &values, const string &path, int &column_count){
     //how many rows are there?
 
     for(string line; getline(input_stream, line);) {
+			cout << line << endl;
       column_count ++;
       stringstream ss(line);
 
