@@ -32,12 +32,10 @@ void print_to_csv(const float *sequence, int length, string output_file) {
   ofstream out_file;
   out_file.open (output_file, fstream::app);
 
-  for(int i = 0; i < length - 1; i ++) {
-    out_file << sequence[i] << ",";
+  for(int i = 0; i < length; i ++) {
+    out_file << sequence[i] << endl;
   }
 
-  out_file << sequence[length - 1]; 
-  out_file << endl;
   out_file.close();
 }
 
@@ -50,6 +48,8 @@ void sqrt(float *da) {
 }
 
 int main() {
+
+  system("head input.csv");
   //INPUTS
   int N;
 
