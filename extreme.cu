@@ -68,7 +68,7 @@ int main() {
 
   //INPUTS
   int N = 0;
-  int rows; int columns;
+  int rows = 0; int columns = 0;
 
   //read into vector so for dynamic length + size checking
   vector<float> inputs;
