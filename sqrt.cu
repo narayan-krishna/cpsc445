@@ -46,7 +46,7 @@ void sqrt(float *da) {
   int tid = threadIdx.x;
   printf("tid is: %i\n", tid);
 
-  // da[tid] = sqrt((float) da[tid]);
+  da[tid] = sqrt((float) da[tid]);
 }
 
 int main() {
@@ -65,7 +65,7 @@ int main() {
     ha[i] = inputs[i];
   }
 
-  int *da;
+  float *da;
   cudaMalloc((void **) &da, N*sizeof(float));
   cudaMemcpy(da, ha, N*sizeof(float), cudaMemcpyHostToDevice); //copy ints from ha into da
 
