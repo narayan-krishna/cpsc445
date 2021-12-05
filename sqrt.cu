@@ -46,7 +46,6 @@ __global__
 void sqrt(float *da) {
   int tid = threadIdx.x;
   printf("tid is: %i, seeing value: %f\n", tid, da[tid]);
-
   da[tid] = sqrt(da[tid]);
 }
 
@@ -56,6 +55,7 @@ int main() {
   cout << "\n-----------------------------" << endl;
   //INPUTS
   int N;
+  cout << N << endl;
 
   //read into vector so for dynamic length + size checking
   vector<float> inputs;
