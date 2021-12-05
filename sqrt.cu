@@ -34,7 +34,7 @@ void print_to_csv(const float *sequence, int length, string output_file) {
 
   for(int i = 0; i < length; i ++) {
     out_file << sequence[i] << endl;
-    while ( i < 10 ) {
+    if ( i < 10 ) {
       cout << sequence[i] << endl;
     }
   }
