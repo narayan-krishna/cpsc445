@@ -73,11 +73,12 @@ int main() {
   //read into vector so for dynamic length + size checking
   vector<float> inputs;
   read_csv(inputs, "input.csv", columns);
-  rows = N/columns;
-  printf("rows: %i | columns %i\n", rows, columns);
   cout << "\ninputs(" << inputs.size() << ")" << endl;
 
   N = inputs.size();
+
+  rows = N/columns;
+  printf("rows: %i | columns: %i\n", rows, columns);
 
   float *ha = new float[N];
 
