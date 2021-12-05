@@ -44,7 +44,7 @@ void print_to_csv(const float *sequence, int length, string output_file) {
 
 __global__ 
 void sqrt(float *da, int N) {
-  int gid = blockIdx.x * blockDimx + threadIdx.x;
+  int gid = blockIdx.x * blockDim.x + threadIdx.x;
   da[gid] = sqrt(da[gid]);
   // printf("tid is: %i, seeing value: %f\n", tid, da[tid]);
 }
@@ -80,9 +80,9 @@ int main() {
   cudaMemcpy(da, ha, N*sizeof(float), cudaMemcpyHostToDevice); //copy ints from ha into da
 
   int Nthreads = 512;
-  int NBlocks = (N + (Nthreads - 1)) / threads;
+  int Nblocks = (N + (Nthreads - 1)) / Nthreads;
   cout << Nthreads << ", " << Nblocks << endl;
-  sqrt<<<NBlocks,Nthreads>>>(da, N);
+  sqrt<<<Nblocks,Nthreads>>>(da, N);
   cudaDeviceSynchronize();
 
   cudaMemcpy(ha, da, N*sizeof(float), cudaMemcpyDeviceToHost); //copy back value of da int sum
