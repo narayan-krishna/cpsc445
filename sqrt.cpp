@@ -30,16 +30,15 @@ void read_csv(vector<float> &values, const string &path){
 //print a sequence of characters to a file
 void print_to_csv(const float *sequence, int length, string output_file) {
   ofstream out_file;
-  out_file.open (output_file, fstream::app);
+  out_file.open (output_file, ofstream::trunc);
 
   for(int i = 0; i < length; i ++) {
     out_file << sequence[i] << endl;
-    if ( i < 10 ) {
-      cout << sequence[i] << endl;
-    }
   }
 
   out_file.close();
+  // system("head output.csv");
+  // system("rm output.csv");
 }
 
 __global__ 
@@ -53,7 +52,7 @@ void sqrt(float *da) {
 int main() {
   cout << "csv head --------------------" << endl;
   system("head input.csv");
-  cout << "-----------------------------" << endl;
+  cout << "\n-----------------------------" << endl;
   //INPUTS
   int N;
 
