@@ -44,7 +44,7 @@ void print_to_csv(const float *sequence, int length, string output_file) {
 
 __global__ 
 void sqrt(float *da) {
-  cout << "hello" << endl;
+  printf("hello\n");
   int tid = threadIdx.x;
   // printf("tid is: %i, seeing value: %f\n", tid, da[tid]);
   da[tid] = sqrt(da[tid]);
@@ -56,12 +56,12 @@ int main() {
   cout << "\n-----------------------------" << endl;
 
   //INPUTS
-  int N;
-  cout << N << endl;
+  int N = 0;
 
   //read into vector so for dynamic length + size checking
   vector<float> inputs;
   read_csv(inputs, "input.csv");
+  cout << "inputs" << inputs.size() << endl;
 
   N = inputs.size();
 
@@ -70,6 +70,11 @@ int main() {
   for(int i = 0; i < N; i++) {
     ha[i] = inputs[i];
   }
+
+  for(int i = 0; i < 10; i ++) {
+    cout << inputs[i] << ", ";
+  }
+  cout << endl;
 
   float *da;
   cudaMalloc((void **) &da, N*sizeof(float));
