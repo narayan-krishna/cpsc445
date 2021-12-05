@@ -29,15 +29,12 @@ void read_csv(vector<float> &values, const string &path){
 
 //print a sequence of characters to a file
 void print_to_csv(const float *sequence, int length, string output_file) {
-  ofstream out_file(output_file);
+  ofstream out_file;
+  out_file.open (output_file);
 
-  if(out_file.is_open()) {
-    for(int i = 0; i < length; i ++) {
-      out_file << sequence[i] << endl;
-    }
-  } else {
-    cerr << "failed to open file ..." << endl;
-    exit(EXIT_FAILURE);
+  for(int i = 0; i < length; i ++) {
+    out_file << sequence[i] << endl;
+    out_file << i << endl;
   }
 
   out_file.close();
