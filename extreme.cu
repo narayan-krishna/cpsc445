@@ -17,11 +17,10 @@ void read_csv(vector<float> &values, const string &path, int &column_count){
       exit(EXIT_FAILURE);
     }
 
-    //how many rows are there?
+    //how many columns are there?
 
-    for(string line; getline(input_stream, line);) {
+    for(string line; getline(input_stream, line); column_count ++) {
 			cout << line << endl;
-      column_count ++;
       stringstream ss(line);
 
       string float_string;
