@@ -45,7 +45,7 @@ void print_to_csv(const float *sequence, int length, string output_file) {
 __global__ 
 void sqrt(float *da) {
   int tid = threadIdx.x;
-  printf("tid is: %i\n", tid);
+  printf("tid is: %i, seeing value: %f\n", tid, da[tid]);
 
   da[tid] = sqrt(da[tid]);
 }
