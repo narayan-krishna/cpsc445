@@ -34,6 +34,9 @@ void print_to_csv(const float *sequence, int length, string output_file) {
 
   for(int i = 0; i < length; i ++) {
     out_file << sequence[i] << endl;
+    while ( i < 10 ) {
+      cout << sequence[i] << endl;
+    }
   }
 
   out_file.close();
@@ -48,8 +51,9 @@ void sqrt(float *da) {
 }
 
 int main() {
-
+  cout << "csv head --------------------" << end;
   system("head input.csv");
+  cout << "-----------------------------" << end;
   //INPUTS
   int N;
 
