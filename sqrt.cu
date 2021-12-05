@@ -51,9 +51,9 @@ void sqrt(float *da) {
 }
 
 int main() {
-  cout << "csv head --------------------" << end;
+  cout << "csv head --------------------" << endl;
   system("head input.csv");
-  cout << "-----------------------------" << end;
+  cout << "-----------------------------" << endl;
   //INPUTS
   int N;
 
