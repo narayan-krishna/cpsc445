@@ -80,6 +80,10 @@ int main() {
 
   print_to_csv(ha, N, "output.csv");
 
+  cout << "head output csv" << "--------------" << endl;
+  system("head output.csv");
+  cout << "------------------------------------" << endl;
+
   cudaFree(da);
   free(ha);
   cout << "------------------------------------" << endl;
