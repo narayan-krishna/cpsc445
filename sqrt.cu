@@ -31,7 +31,7 @@ void read_csv(vector<float> &values, const string &path){
 void print_to_csv(const float *sequence, int length, string output_file) {
 
   ofstream out_file;
-  out_file.open (output_file, fstream::app);
+  out_file.open (output_file);
 
   for(int i = 0; i < length; i ++) {
     out_file << sequence[i] << endl;
@@ -51,7 +51,7 @@ void sqrt(float *da) {
 }
 
 int main() {
-  cout << "csv head --------------------" << endl;
+  cout << "csv input head --------------------" << endl;
   system("head input.csv");
   cout << "\n-----------------------------" << endl;
   //INPUTS
