@@ -51,9 +51,9 @@ void sqrt(float *da) {
 }
 
 int main() {
-  // cout << "csv head --------------------" << endl;
-  // system("head input.csv");
-  // cout << "\n-----------------------------" << endl;
+  cout << "csv head --------------------" << endl;
+  system("head input.csv");
+  cout << "\n-----------------------------" << endl;
   //INPUTS
   int N;
 
@@ -86,6 +86,5 @@ int main() {
 
   cudaFree(da);
   free(ha);
-  cout << "------------------------------------" << endl;
   return 0;
 }
