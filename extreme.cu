@@ -9,7 +9,7 @@
 using namespace std;
 
 //read string from file into a vector -> translate chars to ints
-void read_csv(vector<float> &values, const string &path/*, int &new_line_loc*/){
+void read_csv(vector<float> &values, const string &path, int &column_count){
     ifstream input_stream (path);
 
     if (!input_stream.is_open()) {
@@ -17,7 +17,10 @@ void read_csv(vector<float> &values, const string &path/*, int &new_line_loc*/){
       exit(EXIT_FAILURE);
     }
 
+    //how many rows are there?
+
     for(string line; getline(input_stream, line);) {
+      column_count ++;
       stringstream ss(line);
 
       string float_string;
@@ -65,10 +68,13 @@ int main() {
 
   //INPUTS
   int N = 0;
+  int rows; int columns;
 
   //read into vector so for dynamic length + size checking
   vector<float> inputs;
-  read_csv(inputs, "input.csv");
+  read_csv(inputs, "input.csv", columns);
+  rows = N/columns;
+  printf("rows: %i | columns %i\n", rows, columns);
   cout << "\ninputs(" << inputs.size() << ")" << endl;
 
   N = inputs.size();
