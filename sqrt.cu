@@ -53,7 +53,7 @@ void sqrt(float *da, int N) {
 }
 
 int main() {
-  cout << "csv input head --------------------" << endl;
+  cout << "\ncsv input head --------------------" << endl;
   system("head input.csv");
   cout << "\n-----------------------------" << endl;
 
@@ -63,7 +63,7 @@ int main() {
   //read into vector so for dynamic length + size checking
   vector<float> inputs;
   read_csv(inputs, "input.csv");
-  cout << "inputs" << inputs.size() << endl;
+  cout << "\ninputs(" << inputs.size() << ")" << endl;
 
   N = inputs.size();
 
@@ -76,13 +76,14 @@ int main() {
   for(int i = 0; i < 10; i ++) {
     cout << inputs[i] << ", ";
   }
-  cout << endl;
+  cout << endl; cout << endl;
 
   float *da;
   cudaMalloc((void **) &da, N*sizeof(float));
   cudaMemcpy(da, ha, N*sizeof(float), cudaMemcpyHostToDevice); //copy ints from ha into da
 
   int Nthreads = 512;
+  int NBlocks = 
   sqrt<<<1,Nthreads>>>(da, N);
   cudaDeviceSynchronize();
 
