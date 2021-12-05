@@ -83,7 +83,7 @@ int main() {
   cudaMemcpy(da, ha, N*sizeof(float), cudaMemcpyHostToDevice); //copy ints from ha into da
 
   int Nthreads = 512;
-  int NBlocks = (N/Nthreads) + 1
+  int NBlocks = (N/Nthreads) + 1;
   sqrt<<<NBlocks,Nthreads>>>(da, N);
   cudaDeviceSynchronize();
 
