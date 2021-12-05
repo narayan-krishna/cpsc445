@@ -9,7 +9,7 @@
 using namespace std;
 
 //read string from file into a vector -> translate chars to ints
-void read_csv(vector<float> &values, const string &path, /*int &new_line_loc*/){
+void read_csv(vector<float> &values, const string &path/*, int &new_line_loc*/){
     ifstream input_stream (path);
 
     if (!input_stream.is_open()) {
