@@ -90,23 +90,19 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
   //   }
   // }
   // return true;
-  bool greater = true; bool lesser = false;
+  bool greater = true; bool lesser = true;
   for(int i = 0; i < 8; i ++) {
     if (da[neighbors[i]] != 0) {
       if(da[neighbors[i]] < da[addr_1d]) {
         greater = false;
-        lesser = true;
       } else {
-        greater = true;
         lesser = false;
       }
     }
   } 
 
-  if(greater) {
-    return greater;
-  } else {
-    return lesser;
+  if(greater || lesser) {
+    return true;
   }
 }
 
