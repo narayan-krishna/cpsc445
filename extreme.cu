@@ -63,7 +63,7 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows) {
   for(int i = 0; i < 8; i ++) {
     if(neighbors[i] > 0) { //if the nieghbor is negative, ignore it
       //is the nieghbor smaller than the current cell?
-      bool is_smaller = (neighbors[i] < da[addr_1d]);
+      bool is_smaller = (da[neighbors[i]] < da[addr_1d]);
       if (decided) { //if we already know we're looking for g/s
         if (is_smaller != check_for_smaller) { //if we dont' match the condition 
                                                //we're checking for
@@ -156,7 +156,7 @@ int main() {
   print_to_csv(hbools, N, "output.csv");
 
   cout << "head output csv" << "--------------" << endl;
-  system("cat output.csv");
+  system("head output.csv");
   cout << "------------------------------------" << endl;
 
   cudaFree(da);
