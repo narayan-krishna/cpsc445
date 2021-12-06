@@ -180,6 +180,14 @@ int main() {
   cudaMemcpy(ha, da, Ndeadcells*sizeof(float), cudaMemcpyDeviceToHost); //copy back value of da int sum
   cudaMemcpy(hbools, dbools, Ndeadcells*sizeof(bool), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
+  for(int i = 0; i < rows + 2; i ++) {
+    for(int j = 0; j < columns + 2; j ++) {
+      cout << hbools[(i*m)+j];
+    }
+    cout << endl;
+    // cout << endl;
+  }
+
   print_to_csv(hbools, Ndeadcells, rows, "output.csv");
 
   cout << "head output csv" << "--------------" << endl;
