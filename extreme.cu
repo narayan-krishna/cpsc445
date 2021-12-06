@@ -74,26 +74,27 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
   neighbors[6] = addr_1d + rows - 1;
   neighbors[7] = addr_1d + rows + 1;
 
-  printf("id %i ---", addr_1d);
+  int neighbor_sum = 0;
   for(int i = 0; i < 8; i ++) {
     if(neighbors[i] > 0 && neighbors[i] < N) { //ignore if nieghbor is negative/outofgrid
       //is the nieghbor smaller than the current cell?
-      bool is_smaller = (da[neighbors[i]] < da[addr_1d]);
-      if (decided) { //if we already know we're looking for g/s
-        if (is_smaller != check_for_smaller) { //if we dont' match the condition 
-                                               //we're checking for
-          return false; //return false
-        }
-      } else { //if we haven't decided, decided will be this 
-        check_for_smaller = is_smaller;
-        decided = true;
-      }
+      // bool is_smaller = (da[neighbors[i]] < da[addr_1d]);
+      // if (decided) { //if we already know we're looking for g/s
+      //   if (is_smaller != check_for_smaller) { //if we dont' match the condition 
+      //                                          //we're checking for
+      //     return false; //return false
+      //   }
+      // } else { //if we haven't decided, decided will be this 
+      //   check_for_smaller = is_smaller;
+      //   decided = true;
+      // }
+      neighbor_sum ++;
     }
-    // printf("%i,", neighbors[i]);
   }
   // printf("\n");
+  if (neighbor_sum == 8) return true;
+  return false;
 
-  return true;
 }
 
 __global__ 
