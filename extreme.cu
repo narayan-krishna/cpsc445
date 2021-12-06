@@ -76,7 +76,7 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
   //     }
   //   }
   // }
-  if(addr%0) {
+  if(addr_1d%0) {
     return false;
   } else{
     return true;
