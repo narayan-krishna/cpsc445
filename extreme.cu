@@ -139,19 +139,15 @@ int main() {
   rows = N/columns;
   printf("rows: %i | columns: %i\n", rows, columns);
 
-  vector<vector<float>> inputs_2d;
-  for(int i = 0; i < rows + 2; i ++) {
-    for(int j = 0; j < columns + 2; j ++) {
-      inputs_2d[i][j] = 0;
-    }
-  }
+  vector<vector<float>> inputs_2d(rows + 2, vector<int> (columns + 2, 0));
 
   for(int i = 1; i < rows + 1; i ++) {
     for(int j = 1; j < columns + 1; j ++) {
       inputs_2d[i][j] = inputs[(i*j) - 1];
     }
   }
-  
+
+
   for(int i = 0; i < rows + 2; i ++) {
     for(int j = 0; j < columns + 2; j ++) {
       cout << inputs_2d[i][j];
