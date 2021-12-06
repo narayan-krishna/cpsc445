@@ -71,8 +71,9 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
   neighbors[6] = addr_1d + rows - 1;
   neighbors[7] = addr_1d + rows + 1;
 
+  printf("id %i ---", addr_1d);
   for(int i = 0; i < 8; i ++) {
-    if(neighbors[i] > 0 && neighbors[i] < N) { //if the nieghbor is negative, ignore it
+    if(neighbors[i] > 0 && neighbors[i] < N) { //ignore if nieghbor is negative/outofgrid
       //is the nieghbor smaller than the current cell?
       bool is_smaller = (da[neighbors[i]] < da[addr_1d]);
       if (decided) { //if we already know we're looking for g/s
@@ -85,7 +86,9 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
         decided = true;
       }
     }
+    printf("%i,", neighbors[i]);
   }
+  printf("\n");
 
   return true;
 }
