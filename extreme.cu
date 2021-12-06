@@ -56,7 +56,6 @@ void print_to_csv(const bool *sequence, int length, int rows, string output_file
 
 __device__
 bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const int &N) {
-  if(da[addr_1d] == 0) return false;
   // cout << here << endl;
   // bool check_for_smaller = false;
   // bool decided = false;
@@ -65,15 +64,15 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
   neighbors[0] = addr_1d - 1;
   neighbors[1] = addr_1d + 1;
 
-  neighbors[2] = addr_1d - (rows + 2);
+  neighbors[2] = addr_1d - (rows);
 
-  neighbors[3] = addr_1d - (rows + 2) - 1;
-  neighbors[4] = addr_1d - (rows + 2) + 1;
+  neighbors[3] = addr_1d - (rows) - 1;
+  neighbors[4] = addr_1d - (rows) + 1;
 
-  neighbors[5] = addr_1d + (rows + 2);
+  neighbors[5] = addr_1d + (rows);
 
-  neighbors[6] = addr_1d + (rows + 2) - 1;
-  neighbors[7] = addr_1d + (rows + 2) + 1;
+  neighbors[6] = addr_1d + (rows) - 1;
+  neighbors[7] = addr_1d + (rows) + 1;
 
   // for(int i = 0; i < 8; i ++) {
   //   if(neighbors[i] != 0) { //ignore if nieghbor is negative/outofgrid
@@ -100,6 +99,7 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
                                         da[neighbors[5]],
                                         da[neighbors[6]],
                                         da[neighbors[7]]);
+  if(da[addr_1d] == 0) return false;
   bool greater = true; bool lesser = true;
   for(int i = 0; i < 8; i ++) {
     if (da[neighbors[i]] != 0) {
@@ -192,13 +192,15 @@ int main() {
   float *da; bool *dbools;
   cudaMalloc((void **) &da, Ndeadcells*sizeof(float));
   cudaMalloc((void **) &dbools, Ndeadcells*sizeof(bool));
+
   cudaMemcpy(da, ha, Ndeadcells*sizeof(float), cudaMemcpyHostToDevice); //copy ints from ha into da
   cudaMemcpy(dbools, hbools, Ndeadcells*sizeof(bool), cudaMemcpyHostToDevice); //copy ints from ha into da
 
   int Nthreads = 512;
   int Nblocks = (Ndeadcells + (Nthreads - 1)) / Nthreads;
   cout << Nthreads << ", " << Nblocks << endl;
-  extreme<<<Nblocks,Nthreads>>>(da, dbools, Ndeadcells, rows, columns);
+
+  extreme<<<Nblocks,Nthreads>>>(da, dbools, Ndeadcells, rows + 2, columns + 2);
   cudaDeviceSynchronize();
 
   cudaMemcpy(ha, da, Ndeadcells*sizeof(float), cudaMemcpyDeviceToHost); //copy back value of da int sum
