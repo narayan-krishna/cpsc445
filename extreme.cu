@@ -42,11 +42,12 @@ void print_to_csv(const bool *sequence, int length, int rows, string output_file
   out_file.open (output_file);
 
   for(int i = 0; i < length; i ++) {
-    if (sequence[i] == 1) {
-      int x_coord; int y_coord;
-      get_resident_coords(i, x_coord, y_coord, rows);
-      out_file << x_coord << ", " << y_coord << endl; 
-    }
+    // if (sequence[i] == 1) {
+    //   int x_coord; int y_coord;
+    //   get_resident_coords(i, x_coord, y_coord, rows);
+    //   out_file << x_coord << ", " << y_coord << endl; 
+    // }
+    cout << i << ", " << sequence[i] << endl;
   }
 
   out_file.close();
