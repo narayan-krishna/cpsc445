@@ -47,7 +47,7 @@ void print_to_csv(const bool *sequence, int length, int rows, string output_file
     //   get_resident_coords(i, x_coord, y_coord, rows);
     //   out_file << x_coord << ", " << y_coord << endl; 
     // }
-    cout << i << ", " << sequence[i] << endl;
+    // cout << i << ", " << sequence[i] << endl;
   }
 
   out_file.close();
@@ -77,19 +77,18 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
 
   int neighbor_sum = 0;
   for(int i = 0; i < 8; i ++) {
-    if(neighbors[i] > 0 && neighbors[i] < N) { //ignore if nieghbor is negative/outofgrid
+    if(neighbors[i] != 0) { //ignore if nieghbor is negative/outofgrid
       //is the nieghbor smaller than the current cell?
-      // bool is_smaller = (da[neighbors[i]] < da[addr_1d]);
-      // if (decided) { //if we already know we're looking for g/s
-      //   if (is_smaller != check_for_smaller) { //if we dont' match the condition 
-      //                                          //we're checking for
-      //     return false; //return false
-      //   }
-      // } else { //if we haven't decided, decided will be this 
-      //   check_for_smaller = is_smaller;
-      //   decided = true;
-      // }
-      neighbor_sum ++;
+      bool is_smaller = (da[neighbors[i]] < da[addr_1d]);
+      if (decided) { //if we already know we're looking for g/s
+        if (is_smaller != check_for_smaller) { //if we dont' match the condition 
+                                               //we're checking for
+          return false; //return false
+        }
+      } else { //if we haven't decided, decided will be this 
+        check_for_smaller = is_smaller;
+        decided = true;
+      }
     }
   }
   // printf("\n");
@@ -147,16 +146,22 @@ int main() {
     }
   }
 
+  int Ndeadcells = (rows + 2) * (columns + 2);
+  float *ha = new float[Ndeadcells];
+  bool *hbools = new bool[N]();
 
   for(int i = 0; i < rows + 2; i ++) {
     for(int j = 0; j < columns + 2; j ++) {
-      cout << inputs_2d[i][j];
+      // cout << inputs_2d[i][j];
+      ha[(i*(columns+2))+j] = inputs_2d[i][j];
     }
-    cout << endl;
+    // cout << endl;
   }
 
-  float *ha = new float[N];
-  bool *hbools = new bool[N]();
+  cout << "flattened" << endl;
+  for(int i = 0; i < Ndeadcells; i ++) {
+    cout << ha[i] << "," ;
+  } cout << endl;
 
   for(int i = 0; i < 20; i ++) {
     cout << inputs[i] << ", ";
@@ -164,18 +169,18 @@ int main() {
   cout << "..." << endl; cout << endl;
 
   float *da; bool *dbools;
-  cudaMalloc((void **) &da, N*sizeof(float));
+  cudaMalloc((void **) &da, Ndeadcells*sizeof(float));
   cudaMalloc((void **) &dbools, N*sizeof(bool));
-  cudaMemcpy(da, ha, N*sizeof(float), cudaMemcpyHostToDevice); //copy ints from ha into da
+  cudaMemcpy(da, ha, Ndeadcells*sizeof(float), cudaMemcpyHostToDevice); //copy ints from ha into da
   cudaMemcpy(dbools, hbools, N*sizeof(bool), cudaMemcpyHostToDevice); //copy ints from ha into da
 
   int Nthreads = 512;
-  int Nblocks = (N + (Nthreads - 1)) / Nthreads;
+  int Nblocks = (Ndeadcells + (Nthreads - 1)) / Nthreads;
   cout << Nthreads << ", " << Nblocks << endl;
-  extreme<<<Nblocks,Nthreads>>>(da, dbools, N, rows, columns);
+  extreme<<<Nblocks,Nthreads>>>(da, dbools, Ndeadcells, rows, columns);
   cudaDeviceSynchronize();
 
-  cudaMemcpy(ha, da, N*sizeof(float), cudaMemcpyDeviceToHost); //copy back value of da int sum
+  cudaMemcpy(ha, da, Ndeadcells*sizeof(float), cudaMemcpyDeviceToHost); //copy back value of da int sum
   cudaMemcpy(hbools, dbools, N*sizeof(bool), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
   print_to_csv(hbools, N, rows, "output.csv");
