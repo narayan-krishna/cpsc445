@@ -56,6 +56,7 @@ void print_to_csv(const bool *sequence, int length, int rows, string output_file
 
 __device__
 bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const int &N) {
+  if(da[addr_1d] == 0) return false;
   // cout << here << endl;
   // bool check_for_smaller = false;
   // bool decided = false;
@@ -129,7 +130,7 @@ void extreme(float *da, bool *dbools, int N, int rows, int columns) {
 
   // s[tid] = da[gid]; //copy everything
   // __syncthreads();
-  if (da[gid] != 0) dbools[gid] = is_smaller_or_greater(da, gid, rows, N);
+  dbools[gid] = is_smaller_or_greater(da, gid, rows, N);
   // printf("tid is: %i, seeing value: %f\n", tid, da[tid]);
 }
 
