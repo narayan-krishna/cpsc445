@@ -127,7 +127,7 @@ int main() {
   printf("rows: %i | columns: %i\n", rows, columns);
 
   float *ha = new float[N];
-  bool *hbools = new bool[N];
+  bool *hbools = new bool[N]();
 
   for(int i = 0; i < N; i++) {
     ha[i] = inputs[i];
