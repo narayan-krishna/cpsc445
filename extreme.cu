@@ -57,41 +57,42 @@ void print_to_csv(const bool *sequence, int length, int rows, string output_file
 __device__
 bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const int &N) {
   // cout << here << endl;
-  // bool check_for_smaller = false;
-  // bool decided = false;
+  bool check_for_smaller = false;
+  bool decided = false;
 
-  // int neighbors[8]; //eight surrounding neighbors
-  // neighbors[0] = addr_1d - 1;
-  // neighbors[1] = addr_1d + 1;
+  int neighbors[8]; //eight surrounding neighbors
+  neighbors[0] = addr_1d - 1;
+  neighbors[1] = addr_1d + 1;
 
-  // neighbors[2] = addr_1d - rows;
-  // neighbors[5] = addr_1d + rows;
+  neighbors[2] = addr_1d - (rows + 2);
+  neighbors[5] = addr_1d + (rows + 2);
 
-  // neighbors[3] = addr_1d - rows - 1;
-  // neighbors[4] = addr_1d - rows + 1;
+  neighbors[3] = addr_1d - (rows + 2) - 1;
+  neighbors[4] = addr_1d - (rows + 2) + 1;
 
-  // neighbors[6] = addr_1d + rows - 1;
-  // neighbors[7] = addr_1d + rows + 1;
+  neighbors[6] = addr_1d + (rows + 2) - 1;
+  neighbors[7] = addr_1d + (rows + 2) + 1;
 
-  // for(int i = 0; i < 8; i ++) {
-  //   if(neighbors[i] != 0) { //ignore if nieghbor is negative/outofgrid
-  //     //is the nieghbor smaller than the current cell?
-  //     bool is_smaller = (da[neighbors[i]] < da[addr_1d]);
-  //     if (decided) { //if we already know we're looking for g/s
-  //       if (is_smaller != check_for_smaller) { //if we dont' match the condition 
-  //                                              //we're checking for
-  //         return false; //return false
-  //       }
-  //     } else { //if we haven't decided, decided will be this 
-  //       check_for_smaller = is_smaller;
-  //       decided = true;
-  //     }
-  //   }
-  // }
+  for(int i = 0; i < 8; i ++) {
+    if(neighbors[i] != 0) { //ignore if nieghbor is negative/outofgrid
+      //is the nieghbor smaller than the current cell?
+      bool is_smaller = (da[neighbors[i]] < da[addr_1d]);
+      if (decided) { //if we already know we're looking for g/s
+        if (is_smaller != check_for_smaller) { //if we dont' match the condition 
+                                               //we're checking for
+          return false; //return false
+        }
+      } else { //if we haven't decided, decided will be this 
+        check_for_smaller = is_smaller;
+        decided = true;
+      }
+    }
+  }
+  return true;
 
-  if (da[addr_1d] < 32) { 
-    return true;
-  } else return false;
+  // if (da[addr_1d] < 32) { 
+  //   return true;
+  // } else return false;
 }
 
 __global__ 
