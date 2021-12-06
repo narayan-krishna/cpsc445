@@ -139,7 +139,7 @@ int main() {
   rows = N/columns;
   printf("rows: %i | columns: %i\n", rows, columns);
 
-  vector<vector<float>> inputs_2d(rows + 2, vector<int> (columns + 2, 0));
+  vector<vector<float>> inputs_2d(rows + 2, vector<float> (columns + 2, 0));
 
   for(int i = 1; i < rows + 1; i ++) {
     for(int j = 1; j < columns + 1; j ++) {
