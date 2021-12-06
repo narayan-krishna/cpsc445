@@ -42,12 +42,11 @@ void print_to_csv(const bool *sequence, int length, int rows, string output_file
   out_file.open (output_file);
 
   for(int i = 0; i < length; i ++) {
-    // if (sequence[i] == 1) {
-    //   int x_coord; int y_coord;
-    //   get_resident_coords(i, x_coord, y_coord, rows);
-    //   out_file << x_coord << ", " << y_coord << endl; 
-    // }
-    // cout << i << ", " << sequence[i] << endl;
+    if (sequence[i] == 1) {
+      int x_coord; int y_coord;
+      get_resident_coords(i, x_coord, y_coord, rows);
+      out_file << x_coord << ", " << y_coord << endl; 
+    }
   }
 
   out_file.close();
@@ -66,16 +65,14 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
   neighbors[1] = addr_1d + 1;
 
   neighbors[2] = addr_1d - rows;
+  neighbors[5] = addr_1d + rows;
 
   neighbors[3] = addr_1d - rows - 1;
   neighbors[4] = addr_1d - rows + 1;
 
-  neighbors[5] = addr_1d + rows;
-
   neighbors[6] = addr_1d + rows - 1;
   neighbors[7] = addr_1d + rows + 1;
 
-  int neighbor_sum = 0;
   for(int i = 0; i < 8; i ++) {
     if(neighbors[i] != 0) { //ignore if nieghbor is negative/outofgrid
       //is the nieghbor smaller than the current cell?
@@ -91,10 +88,8 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
       }
     }
   }
-  // printf("\n");
-  if (neighbor_sum == 8) return true;
-  return false;
 
+  return true;
 }
 
 __global__ 
@@ -109,7 +104,7 @@ void extreme(float *da, bool *dbools, int N, int rows, int columns) {
 
   // s[tid] = da[gid]; //copy everything
   // __syncthreads();
-  dbools[gid] = is_smaller_or_greater(da, gid, rows, N);
+  if (da[gid] != 0) dbools[gid] = is_smaller_or_greater(da, gid, rows, N);
   // printf("tid is: %i, seeing value: %f\n", tid, da[tid]);
 }
 
@@ -148,7 +143,7 @@ int main() {
 
   int Ndeadcells = (rows + 2) * (columns + 2);
   float *ha = new float[Ndeadcells];
-  bool *hbools = new bool[N]();
+  bool *hbools = new bool[Ndeadcells]();
 
   for(int i = 0; i < rows + 2; i ++) {
     for(int j = 0; j < columns + 2; j ++) {
@@ -170,9 +165,9 @@ int main() {
 
   float *da; bool *dbools;
   cudaMalloc((void **) &da, Ndeadcells*sizeof(float));
-  cudaMalloc((void **) &dbools, N*sizeof(bool));
+  cudaMalloc((void **) &dbools, Ndeadcells*sizeof(bool));
   cudaMemcpy(da, ha, Ndeadcells*sizeof(float), cudaMemcpyHostToDevice); //copy ints from ha into da
-  cudaMemcpy(dbools, hbools, N*sizeof(bool), cudaMemcpyHostToDevice); //copy ints from ha into da
+  cudaMemcpy(dbools, hbools, Ndeadcells*sizeof(bool), cudaMemcpyHostToDevice); //copy ints from ha into da
 
   int Nthreads = 512;
   int Nblocks = (Ndeadcells + (Nthreads - 1)) / Nthreads;
@@ -181,9 +176,9 @@ int main() {
   cudaDeviceSynchronize();
 
   cudaMemcpy(ha, da, Ndeadcells*sizeof(float), cudaMemcpyDeviceToHost); //copy back value of da int sum
-  cudaMemcpy(hbools, dbools, N*sizeof(bool), cudaMemcpyDeviceToHost); //copy back value of da int sum
+  cudaMemcpy(hbools, dbools, Ndeadcells*sizeof(bool), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
-  print_to_csv(hbools, N, rows, "output.csv");
+  print_to_csv(hbools, Ndeadcells, rows, "output.csv");
 
   cout << "head output csv" << "--------------" << endl;
   system("cat output.csv");
