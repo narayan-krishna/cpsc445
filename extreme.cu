@@ -156,7 +156,7 @@ int main() {
   print_to_csv(hbools, N, "output.csv");
 
   cout << "head output csv" << "--------------" << endl;
-  system("head output.csv");
+  system("cat output.csv");
   cout << "------------------------------------" << endl;
 
   cudaFree(da);
