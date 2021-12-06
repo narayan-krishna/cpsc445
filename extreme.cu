@@ -30,14 +30,23 @@ void read_csv(vector<float> &values, const string &path, int &column_count){
     }
 }
 
+inline void get_resident_coords(const int &index, int &x_coord, int &y_coord, int &rows) {
+    x_coord = (index % rows);
+    y_coord = (index / rows); 
+}
+
 //print a sequence of characters to a file
-void print_to_csv(const bool *sequence, int length, string output_file) {
+void print_to_csv(const bool *sequence, int length, int rows, string output_file) {
 
   ofstream out_file;
   out_file.open (output_file);
 
   for(int i = 0; i < length; i ++) {
-    out_file << sequence[i] << endl;
+    if (sequence[i] == 1) {
+      int x_coord; int y_coord;
+      get_resident_coords(i, x_coord, y_coord, rows);
+      out_file << x_coord << ", " << y_coord << endl; 
+    }
   }
 
   out_file.close();
@@ -102,12 +111,6 @@ void extreme(float *da, bool *dbools, int N, int rows, int columns) {
  * it will check its neighbors
  * */
 
-
-void get_resident_coords(const int &index, int &x_coord, int &y_coord, int &rows) {
-    x_coord = (index % rows);
-    y_coord = (index / rows); 
-}
-
 int main() {
   cout << "\ncsv input head --------------------" << endl;
   system("head input.csv");
@@ -154,7 +157,7 @@ int main() {
   cudaMemcpy(ha, da, N*sizeof(float), cudaMemcpyDeviceToHost); //copy back value of da int sum
   cudaMemcpy(hbools, dbools, N*sizeof(bool), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
-  print_to_csv(hbools, N, "output.csv");
+  print_to_csv(hbools, N, rows, "output.csv");
 
   cout << "head output csv" << "--------------" << endl;
   system("cat output.csv");
