@@ -76,7 +76,7 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
   //     }
   //   }
   // }
-  if(addr_1d%2 == 0) {
+  if(addr_1d%2) {
     return false;
   } else{
     return true;
@@ -155,7 +155,7 @@ int main() {
   cudaDeviceSynchronize();
 
   cudaMemcpy(ha, da, N*sizeof(float), cudaMemcpyDeviceToHost); //copy back value of da int sum
-  cudaMemcpy(hbools, dbools, N*sizeof(float), cudaMemcpyDeviceToHost); //copy back value of da int sum
+  cudaMemcpy(hbools, dbools, N*sizeof(bool), cudaMemcpyDeviceToHost); //copy back value of da int sum
 
   print_to_csv(hbools, N, "output.csv");
 
