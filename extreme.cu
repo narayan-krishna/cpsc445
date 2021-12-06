@@ -58,16 +58,20 @@ void print_to_csv(const bool *sequence, int length, int rows, string output_file
 __device__
 bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const int &N) {
   // cout << here << endl;
-  bool check_for_smaller;
+  bool check_for_smaller = false;
   bool decided = false;
 
   int neighbors[8]; //eight surrounding neighbors
   neighbors[0] = addr_1d - 1;
   neighbors[1] = addr_1d + 1;
+
   neighbors[2] = addr_1d - rows;
+
   neighbors[3] = addr_1d - rows - 1;
   neighbors[4] = addr_1d - rows + 1;
+
   neighbors[5] = addr_1d + rows;
+
   neighbors[6] = addr_1d + rows - 1;
   neighbors[7] = addr_1d + rows + 1;
 
@@ -86,9 +90,9 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
         decided = true;
       }
     }
-    printf("%i,", neighbors[i]);
+    // printf("%i,", neighbors[i]);
   }
-  printf("\n");
+  // printf("\n");
 
   return true;
 }
