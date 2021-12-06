@@ -182,7 +182,7 @@ int main() {
 
   for(int i = 0; i < rows + 2; i ++) {
     for(int j = 0; j < columns + 2; j ++) {
-      cout << hbools[(i*m)+j];
+      cout << hbools[(i*(columns + 2))+j];
     }
     cout << endl;
     // cout << endl;
