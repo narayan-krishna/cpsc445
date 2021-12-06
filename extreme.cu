@@ -171,10 +171,12 @@ int main() {
   float *ha = new float[Ndeadcells];
   bool *hbools = new bool[Ndeadcells]();
 
+  int k = 0;
   for(int i = 0; i < rows + 2; i ++) {
     for(int j = 0; j < columns + 2; j ++) {
       // cout << inputs_2d[i][j];
-      ha[(i*(columns+2))+j] = inputs_2d[i][j];
+      ha[k] = inputs_2d[i][j];
+      k++;
     }
     // cout << endl;
   }
