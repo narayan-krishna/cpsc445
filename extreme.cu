@@ -48,9 +48,9 @@ void print_to_csv(const bool *sequence, int columns, int rows, string output_fil
   //     out_file << x_coord-1 << ", " << y_coord-1 << endl; 
   //   }
   // }
-  for(int i = 0; i < rows + 2; i ++) {
-    for(int j = 0; j < columns + 2; j ++) {
-      if (sequence[(i*(columns + 2))+j] == 0) {
+  for(int i = 0; i < rows; i ++) {
+    for(int j = 0; j < columns; j ++) {
+      if (sequence[(i*(columns))+j] == 0) {
         out_file << i << ", " << j << endl;
       }
     }
