@@ -51,8 +51,8 @@ void print_to_csv(const bool *sequence, int columns, int rows, string output_fil
   for(int i = 0; i < rows; i ++) {
     for(int j = 0; j < columns; j ++) {
       if (sequence[(i*(columns))+j] == 1) {
-        out_file << i << ", " << j;
-        out_file << " (" << sequence[(i*columns)+j] << ")" << endl;
+        out_file << i - 1 << ", " << j - 1 << endl;
+        // out_file << " (" << sequence[(i*columns)+j] << ")" << endl;
       }
     }
   }
