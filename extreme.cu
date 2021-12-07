@@ -161,9 +161,11 @@ int main() {
 
   vector<vector<float>> inputs_2d(rows + 2, vector<float> (columns + 2, 0));
 
+  int k = 0;
   for(int i = 1; i < rows + 1; i ++) {
     for(int j = 1; j < columns + 1; j ++) {
-      inputs_2d[i][j] = inputs[(i*j) - 1];
+      inputs_2d[i][j] = inputs[k];
+      k++;
     }
   }
 
