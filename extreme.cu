@@ -50,7 +50,7 @@ void print_to_csv(const bool *sequence, int columns, int rows, string output_fil
   // }
   for(int i = 0; i < rows; i ++) {
     for(int j = 0; j < columns; j ++) {
-      if (sequence[(i*(columns))+j] == 0) {
+      if (sequence[(i*(columns))+j] == 1) {
         out_file << i << ", " << j << endl;
       }
     }
