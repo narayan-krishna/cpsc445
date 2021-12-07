@@ -167,6 +167,14 @@ int main() {
     }
   }
 
+  for(int i = 0; i < rows + 2; i ++) {
+    for(int j = 0; j < columns + 2; j ++) {
+      cout << inputs_2d[i][j];
+    }
+    cout << endl;
+  }
+
+
   int Ndeadcells = (rows + 2) * (columns + 2);
   float *ha = new float[Ndeadcells];
   bool *hbools = new bool[Ndeadcells]();
