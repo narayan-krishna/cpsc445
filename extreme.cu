@@ -164,7 +164,7 @@ int main() {
   int o = 0;
   for(int i = 1; i < rows + 1; i ++) {
     for(int j = 1; j < columns + 1; j ++) {
-      inputs_2d[i][j] = inputs[k];
+      inputs_2d[i][j] = inputs[o];
       o++;
     }
   }
