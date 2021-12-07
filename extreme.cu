@@ -36,17 +36,26 @@ inline void get_resident_coords(const int &index, int &x_coord, int &y_coord, in
 }
 
 //print a sequence of characters to a file
-void print_to_csv(const bool *sequence, int length, int rows, string output_file) {
+void print_to_csv(const bool *sequence, int columns, int rows, string output_file) {
 
   ofstream out_file;
   out_file.open (output_file);
 
-  for(int i = 0; i < length; i ++) {
-    if (sequence[i] == 1) {
-      int x_coord; int y_coord;
-      get_resident_coords(i, x_coord, y_coord, rows);
-      out_file << x_coord-1 << ", " << y_coord-1 << endl; 
+  // for(int i = 0; i < length; i ++) {
+  //   if (sequence[i] == 1) {
+  //     int x_coord; int y_coord;
+  //     get_resident_coords(i, x_coord, y_coord, rows);
+  //     out_file << x_coord-1 << ", " << y_coord-1 << endl; 
+  //   }
+  // }
+  for(int i = 0; i < rows + 2; i ++) {
+    for(int j = 0; j < columns + 2; j ++) {
+      if (sequence[(i*(columns + 2))+j] == 0) {
+        out_file << i << ", " << j << endl;
+      }
     }
+    out_file << endl;
+    // cout << endl;
   }
 
   out_file.close();
@@ -90,15 +99,15 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
   //   }
   // }
   // return true;
-  printf("%i [%f] -- %f,%f,%f,%f,%f,%f,%f,%f\n", addr_1d, da[addr_1d],
-                                        da[neighbors[0]],
-                                        da[neighbors[1]],
-                                        da[neighbors[2]],
-                                        da[neighbors[3]],
-                                        da[neighbors[4]],
-                                        da[neighbors[5]],
-                                        da[neighbors[6]],
-                                        da[neighbors[7]]);
+  // printf("%i [%f] -- %f,%f,%f,%f,%f,%f,%f,%f\n", addr_1d, da[addr_1d],
+                                        // da[neighbors[0]],
+                                        // da[neighbors[1]],
+                                        // da[neighbors[2]],
+                                        // da[neighbors[3]],
+                                        // da[neighbors[4]],
+                                        // da[neighbors[5]],
+                                        // da[neighbors[6]],
+                                        // da[neighbors[7]]);
   if(da[addr_1d] == 0) return false;
   bool greater = true; bool lesser = true;
   for(int i = 0; i < 8; i ++) {
@@ -226,7 +235,7 @@ int main() {
     // cout << endl;
   }
 
-  print_to_csv(hbools, Ndeadcells, rows, "output.csv");
+  print_to_csv(hbools, columns + 2, rows + 2, "output.csv");
 
   cout << "head output csv" << "--------------" << endl;
   system("cat output.csv");
