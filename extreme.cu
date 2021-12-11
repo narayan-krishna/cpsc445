@@ -16,7 +16,6 @@ void read_csv(vector<float> &values, const string &path, int &column_count){
       cerr << "coudn't find/open file..." << endl;
       exit(EXIT_FAILURE);
     }
-
     //how many columns are there?
 
     for(string line; getline(input_stream, line); column_count ++) {
@@ -41,13 +40,6 @@ void print_to_csv(const bool *sequence, int columns, int rows, string output_fil
   ofstream out_file;
   out_file.open (output_file);
 
-  // for(int i = 0; i < length; i ++) {
-  //   if (sequence[i] == 1) {
-  //     int x_coord; int y_coord;
-  //     get_resident_coords(i, x_coord, y_coord, rows);
-  //     out_file << x_coord-1 << ", " << y_coord-1 << endl; 
-  //   }
-  // }
   for(int i = 0; i < rows; i ++) {
     for(int j = 0; j < columns; j ++) {
       if (sequence[(i*(columns))+j] == 1) {
@@ -58,15 +50,10 @@ void print_to_csv(const bool *sequence, int columns, int rows, string output_fil
   }
 
   out_file.close();
-  // system("head output.csv");
-  // system("rm output.csv");
 }
 
 __device__
 bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const int &N) {
-  // cout << here << endl;
-  // bool check_for_smaller = false;
-  // bool decided = false;
 
   int neighbors[8]; //eight surrounding neighbors
   neighbors[0] = addr_1d - 1;
@@ -82,22 +69,6 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
   neighbors[6] = addr_1d + (rows) - 1;
   neighbors[7] = addr_1d + (rows) + 1;
 
-  // for(int i = 0; i < 8; i ++) {
-  //   if(neighbors[i] != 0) { //ignore if nieghbor is negative/outofgrid
-  //     //is the nieghbor smaller than the current cell?
-  //     bool is_smaller = (da[neighbors[i]] < da[addr_1d]);
-  //     if (decided) { //if we already know we're looking for g/s
-  //       if (is_smaller != check_for_smaller) { //if we dont' match the condition 
-  //                                              //we're checking for
-  //         return false; //return false
-  //       }
-  //     } else { //if we haven't decided, decided will be this 
-  //       check_for_smaller = is_smaller;
-  //       decided = true;
-  //     }
-  //   }
-  // }
-  // return true;
   // printf("%i [%f] -- %f,%f,%f,%f,%f,%f,%f,%f\n", addr_1d, da[addr_1d],
                                         // da[neighbors[0]],
                                         // da[neighbors[1]],
@@ -107,6 +78,7 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
                                         // da[neighbors[5]],
                                         // da[neighbors[6]],
                                         // da[neighbors[7]]);
+
   if(da[addr_1d] == 0) return false;
   bool greater = true; bool lesser = true;
   for(int i = 0; i < 8; i ++) {
@@ -129,17 +101,8 @@ bool is_smaller_or_greater(float *da, const int &addr_1d, const int &rows, const
 __global__ 
 void extreme(float *da, bool *dbools, int N, int rows, int columns) {
 
-  // int tid = threadIdx.x;
   int gid = blockIdx.x * blockDim.x + threadIdx.x;
-
-  // __shared__ float s[512];
-  //allocated 512 floats per block
-  //copy over 512 floats into the corresponding block
-
-  // s[tid] = da[gid]; //copy everything
-  // __syncthreads();
   dbools[gid] = is_smaller_or_greater(da, gid, rows, N);
-  // printf("tid is: %i, seeing value: %f\n", tid, da[tid]);
 }
 
 /**
