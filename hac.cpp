@@ -27,10 +27,21 @@ void check_error(int status, const string message="MPI error") {
 }
 
 /*assigns rows to process based on rank, and whether there are more processes
-then point count*/
+then points*/
 void acquire_partition_rows(vector<int> &partition_rows,
                                    const int points, const int processes, 
                                    const int rank) {
+  //if more processes than points
+  if(processes >= points) {
+    // cout << "processes greater or equal to points" << endl;
+    if (rank >= points || rank == 0) {
+      partition_rows.push_back(-1);    
+    } else {
+      partition_rows.push_back(rank);
+    }
+
+    return;
+  }
 
   int rows_per_process = (points/processes) + ((rank < points%processes)?1:0);
 
