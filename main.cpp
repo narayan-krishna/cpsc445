@@ -31,6 +31,17 @@ then points*/
 void acquire_partition_rows(vector<int> &partition_rows,
                                    const int points, const int processes, 
                                    const int rank) {
+  //if more processes than points
+  if(processes >= points) {
+    // cout << "processes greater or equal to points" << endl;
+    if (rank >= points || rank == 0) {
+      partition_rows.push_back(-1);    
+    } else {
+      partition_rows.push_back(rank);
+    }
+
+    return;
+  }
 
   int rows_per_process = (points/processes) + ((rank < points%processes)?1:0);
 
@@ -40,6 +51,7 @@ void acquire_partition_rows(vector<int> &partition_rows,
   for (int i = index_start; i < index_end; i++) {
     partition_rows.push_back(i);
   }
+
 }
 
 /*read string from file into a vector -> translate chars to ints*/

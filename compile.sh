@@ -1,2 +1,2 @@
 mpiCC main.cpp
-time mpirun -n 3 ./a.out 3
+time mpirun -n 10 ./a.out 3
