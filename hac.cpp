@@ -27,7 +27,7 @@ void check_error(int status, const string message="MPI error") {
 }
 
 /*assigns rows to process based on rank, and whether there are more processes
-then points*/
+then point count*/
 void acquire_partition_rows(vector<int> &partition_rows,
                                    const int points, const int processes, 
                                    const int rank) {
