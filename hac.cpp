@@ -44,13 +44,11 @@ void acquire_partition_rows(vector<int> &partition_rows,
   }
 
   //if equal to/more points than processes
-  int rows_per_process = points/processes;
-  for (int i = 0; i < rows_per_process; i++) {
-    if (i % 2 == 0) {
-      partition_rows.push_back(rank + i);
-    } else {
-      partition_rows.push_back(points - rank - i);
-    }
+  int rows_per_process = (points/processes) + ((rank < points%processes)?1:0);
+  size_t index_start = rank*(points/processes) + min(rank, points%processes);
+  size_t index_end = index_start + rows_per_process;
+  for (int i = index_start; i < index_end; i++) {
+    partition_rows.push_back(i);
   }
 }
 
@@ -339,12 +337,12 @@ int main (int argc, char *argv[]) {
       compute_distance_matrix(points, partition_rows, x, y, distance_matrix);
     }
 
-    // if (i == 1) {
-    //   sleep(rank);
-    //   cout << "--------------" << rank << endl;
-    //   visualize_distance_matrix(distance_matrix, points);
-    //   cout << "--------------" << endl;
-    // }
+    if (i == 1) {
+      sleep(rank);
+      cout << "--------------" << rank << endl;
+      visualize_distance_matrix(distance_matrix, points);
+      cout << "--------------" << endl;
+    }
 
     if(partition_rows[0] != -1) {
       compute_min_distance_between_clusters(min_cluster, partition_rows, 
