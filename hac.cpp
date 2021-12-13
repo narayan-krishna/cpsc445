@@ -79,7 +79,7 @@ void read_csv_coords(vector<float> &x, vector<float> &y, const string &path){
     }
 }
 
-/*print a vector of type t, with an endline if signaled*/
+/*print a vector  of type t, with an endline if signaled*/
 template <class T>
 inline void print_vector(const vector<T> &vec, const int signal) {
   for(auto i : vec) {
