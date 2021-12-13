@@ -54,6 +54,7 @@ void acquire_partition_rows(vector<int> &partition_rows,
   }
 }
 
+//
 /*read string from file into a vector -> translate chars to ints*/
 void read_csv_coords(vector<float> &x, vector<float> &y, const string &path){
     ifstream input_stream (path);
