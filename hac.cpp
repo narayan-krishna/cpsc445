@@ -2,7 +2,7 @@
  * Hierarchical Agglomerative Clustering using MPI
  * Final Project for CPSC445 (High Performance Computing)
  * 
- * Krishna Narayan
+ * Krishna Narayan 
  * December 13th, 2021
  */
 
