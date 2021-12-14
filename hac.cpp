@@ -298,19 +298,19 @@ int main (int argc, char *argv[]) {
     visualize_clusters(clusters);
   }
 
+  /*start clustering loop*/
   for (int i = 0; i < 5; i ++) {
 
     if(rank == 0) {
-      points = x.size();
-      cluster_candidates.resize(3*p);
+      points = x.size(); //acquire points
+      cluster_candidates.resize(3*p); //resize cluster candidate vector
       if (clusters.size() == 1) {
-        cerr << "coudn't find/open file..." << endl;
+        cerr << "only one cluster left..." << endl;
         exit(1);
       }
     }
 
-    // if (rank == 0) cout << "here" << endl;
-
+    /*broadcast point count*/
     check_error(MPI_Bcast(&points, 1, MPI_INT, 0, MPI_COMM_WORLD));  
 
     if(rank != 0) {
@@ -318,73 +318,60 @@ int main (int argc, char *argv[]) {
       y.resize(points);
     }
 
+    /*broadcast point information*/
     check_error(MPI_Bcast(&x[0], points, MPI_INT, 0, MPI_COMM_WORLD));  
     check_error(MPI_Bcast(&y[0], points, MPI_INT, 0, MPI_COMM_WORLD));  
-
-    // if(rank == 1) {
-    //   cout << "non zero x vector: " << endl;
-    //   print_vector(x, 1); 
-    //   cout << "non zero y vector: " << endl;
-    //   print_vector(y, 1); 
-    // }
 
     distance_matrix.resize(pow(points, 2));
     min_cluster.resize(3, 0);
 
     acquire_partition_rows(partition_rows, points, p, rank);
 
+    /*compute distance matrix for partition (if assigned)*/
     if(partition_rows[0] != -1) {
       compute_distance_matrix(points, partition_rows, x, y, distance_matrix);
     }
 
-    if (i == 1) {
-      sleep(rank);
-      cout << "--------------" << rank << endl;
-      visualize_distance_matrix(distance_matrix, points);
-      cout << "--------------" << endl;
-    }
-
+    /*compute distance min distance for partition (if assigned)*/
     if(partition_rows[0] != -1) {
       compute_min_distance_between_clusters(min_cluster, partition_rows, 
                                             distance_matrix, points, rank);
     } 
 
+    /*ensure all processes have finished calculations*/
     check_error(MPI_Barrier(MPI_COMM_WORLD));
 
+    /*gather candidates together*/
     check_error(MPI_Gather(&min_cluster[0], 3, MPI_FLOAT, &cluster_candidates[0],
                 3, MPI_FLOAT, 0, MPI_COMM_WORLD));
 
-    check_error(MPI_Barrier(MPI_COMM_WORLD));
-    // // sleep(2);
-
     if (rank == 0) {
-      // print_vector(cluster_candidates); cout << endl;
+      /*find the minimum among candidate mins*/
       extract_champion_minimum(cluster_candidates, points); 
-      // print_vector(cluster_candidates); cout << endl;
 
+      /*rearrange clusters, coordinates*/
       average_points(x, y, cluster_candidates[0], cluster_candidates[1]);
       x.erase(x.begin() + cluster_candidates[1]);
       y.erase(y.begin() + cluster_candidates[1]);
 
       update_clusters(cluster_candidates[0], cluster_candidates[1], clusters);
 
-      // sleep(1);
       cout << "cluster iteration " << i + 1 << ": " << endl; 
       visualize_clusters(clusters);
     }
 
     if(rank != 0) {
       x.clear();
+      y.clear();
     }
 
+    /*reset for next iteration*/
     distance_matrix.clear();
     cluster_candidates.clear();
     min_cluster.clear();
-
-    check_error(MPI_Barrier(MPI_COMM_WORLD));
   }
 
-  //finalize and quit mpi, ending processes
+  /*finalize and quit mpi, ending processes*/
   check_error(MPI_Finalize());
   cout << "Ending process " << rank << "/" << "p\n";
 
